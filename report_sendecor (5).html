@@ -1,0 +1,3748 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo Cáo Quản Lý Dự Án</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #1f2a44;
+      --muted: #6b7890;
+      --primary: #1f6feb;
+      --success: #1f9d55;
+      --warning: #e0a800;
+      --danger: #d93025;
+      --border: #e6ebf2;
+      --shadow: 0 6px 18px rgba(28, 41, 61, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #0f274d;
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    }
+
+    .topbar h1 {
+      font-size: 18px;
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+
+    .meta {
+      font-size: 13px;
+      opacity: .9;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 20px auto 40px;
+      padding: 0 16px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .page {
+      background: #eef3fa;
+      border: 1px solid #dbe4f2;
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .page-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+      color: #0f274d;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dce9ff;
+      color: #104fbd;
+      font-weight: 600;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #28436f;
+      font-weight: 700;
+    }
+
+    .big {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #12284a;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .ok { background: #dff5e8; color: #1c7f46; }
+    .warn { background: #fff3d6; color: #9b6b00; }
+    .late { background: #ffdfe0; color: #b42318; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: auto;
+    }
+
+    .table-theme-cost-structure {
+      border-color: #facc15;
+      background: linear-gradient(180deg, #fffef2 0%, #ffffff 100%);
+    }
+
+    .table-theme-cost-structure thead th {
+      background: linear-gradient(180deg, #fde047 0%, #facc15 100%);
+      color: #5b4100;
+      border-bottom: 2px solid #eab308;
+    }
+
+    .table-theme-monthly {
+      border-color: #38bdf8;
+      background: linear-gradient(180deg, #f3fbff 0%, #ffffff 100%);
+    }
+
+    .table-theme-monthly thead th {
+      background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1e3a8a;
+      border-bottom: 2px solid #60a5fa;
+    }
+
+    .table-theme-stage {
+      border-color: #34d399;
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    }
+
+    .table-theme-stage thead th {
+      border-bottom: 2px solid #86efac;
+    }
+
+    .table-theme-gantt {
+      border-color: #c4b5fd;
+      background: linear-gradient(180deg, #f7f5ff 0%, #ffffff 100%);
+    }
+
+    .table-header-band {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px 0;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .row-highlight-total td {
+      background: linear-gradient(90deg, #fff7cc 0%, #fff1a6 100%);
+      color: #c2410c;
+      font-weight: 800;
+      border-top: 2px solid #facc15;
+      border-bottom: 2px solid #facc15;
+    }
+
+    .row-highlight-summary td {
+      background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%);
+      color: #1d4ed8;
+      font-weight: 800;
+    }
+
+    .metric-label-cell {
+      font-weight: 700;
+      color: #0f4c81;
+      background: #f8fbff;
+      min-width: 180px;
+    }
+
+    .monthly-row-gpmb td:nth-child(-n+2) { background: #fff7ed; color: #c2410c; }
+    .monthly-row-phaply td:nth-child(-n+2) { background: #eff6ff; color: #1d4ed8; }
+    .monthly-row-xaydung td:nth-child(-n+2) { background: #ecfdf5; color: #047857; }
+    .monthly-row-kyquy td:nth-child(-n+2) { background: #faf5ff; color: #7c3aed; }
+    .monthly-row-hoso td:nth-child(-n+2) { background: #fff1f2; color: #be123c; }
+    .monthly-row-khac td:nth-child(-n+2) { background: #f8fafc; color: #475569; }
+    .monthly-row-tong td:nth-child(-n+2),
+    .monthly-row-luyke td:nth-child(-n+2) { font-weight: 800; }
+
+    .stage-group-gpmb { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important; color: #fff !important; }
+    .stage-group-legal { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important; color: #fff !important; }
+    .stage-group-build { background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important; color: #fff !important; }
+
+    .gantt-wrap {
+      min-width: 1220px;
+      padding: 8px 14px 16px;
+    }
+
+    .gantt-grid {
+      display: grid;
+      grid-template-columns: 300px repeat(12, minmax(68px, 1fr));
+      border: 1px solid #e9ddff;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .gantt-cell {
+      padding: 10px 8px;
+      font-size: 12px;
+      border-right: 1px solid #efe9ff;
+      border-bottom: 1px solid #efe9ff;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .gantt-head {
+      background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%);
+      color: #4c1d95;
+      font-weight: 800;
+      min-height: 44px;
+    }
+
+    .gantt-project {
+      justify-content: flex-start;
+      background: linear-gradient(180deg, #faf7ff 0%, #f5f3ff 100%);
+      color: #312e81;
+      padding: 10px 12px;
+    }
+
+    .gantt-project-card {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+
+    .gantt-project-name {
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .gantt-project-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: #6366f1;
+    }
+
+    .gantt-overall-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #ddd6fe;
+      overflow: hidden;
+    }
+
+    .gantt-overall-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%);
+    }
+
+    .gantt-slot {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfaff 100%);
+      padding: 6px;
+    }
+
+    .gantt-slot.done { background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 100%); }
+    .gantt-slot.doing { background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); }
+    .gantt-slot.todo { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
+    .gantt-slot.empty { background: #fcfbff; color: #c4b5fd; }
+
+    .gantt-state-pill {
+      min-width: 52px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, .10);
+    }
+
+    .gantt-state-pill.phase-gpmb { background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%); }
+    .gantt-state-pill.phase-legal { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); }
+    .gantt-state-pill.phase-build { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+    .gantt-state-pill.phase-mixed { background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%); }
+
+    .gantt-slot.todo .gantt-state-pill {
+      background: #cbd5e1;
+      color: #475569;
+      box-shadow: none;
+    }
+
+    .gantt-legend {
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      padding: 0 14px 12px;
+      color: #5b6680;
+      font-size: 12px;
+    }
+
+    .gantt-legend span {
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .gantt-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display:inline-block;
+    }
+
+    .gantt-dot.done { background: #10b981; }
+    .gantt-dot.doing { background: #3b82f6; }
+    .gantt-dot.todo { background: #cbd5e1; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf1f7;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    th {
+      background: #f6f9ff;
+      color: #29466f;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .table-compare-projects th:first-child,
+    .table-compare-projects td:first-child {
+      width: 58px;
+      min-width: 58px;
+      text-align: center;
+    }
+
+    .table-compare-projects th:nth-child(2),
+    .table-compare-projects td:nth-child(2) {
+      background: #fff;
+    }
+
+    .project-col-wide {
+      min-width: 280px;
+      width: 280px;
+    }
+
+    .tree-parent td {
+      background: linear-gradient(90deg, #f8fbff 0%, #eef4ff 100%);
+      font-weight: 700;
+      color: #16325c;
+      border-top: 1px solid #d9e6fb;
+      border-bottom: 1px solid #d9e6fb;
+    }
+
+    .tree-level-1 td:first-child {
+      padding-left: 22px;
+      font-weight: 700;
+      color: #1d3557;
+    }
+
+    .tree-level-1 td {
+      background: #f9fbff;
+    }
+
+    .tree-level-2 td:first-child {
+      padding-left: 46px;
+      color: #4b5563;
+      font-style: italic;
+    }
+
+    .tree-level-2 td {
+      background: #fcfdff;
+    }
+
+    .tree-code {
+      display: inline-block;
+      min-width: 34px;
+      color: #0f4fa8;
+      font-weight: 800;
+    }
+
+    .tree-toggle {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border: 1px solid #bfd0ea;
+      background: #ffffff;
+      color: #1f4f91;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 18px;
+      cursor: pointer;
+      vertical-align: middle;
+      padding: 0;
+    }
+
+    .gantt-wrap {
+      min-width: 1220px;
+      padding: 8px 14px 16px;
+    }
+
+    .gantt-grid {
+      display: grid;
+      grid-template-columns: 300px repeat(12, minmax(68px, 1fr));
+      border: 1px solid #e9ddff;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .gantt-cell {
+      padding: 10px 8px;
+      font-size: 12px;
+      border-right: 1px solid #efe9ff;
+      border-bottom: 1px solid #efe9ff;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .gantt-head {
+      background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%);
+      color: #4c1d95;
+      font-weight: 800;
+      min-height: 44px;
+    }
+
+    .gantt-project {
+      justify-content: flex-start;
+      background: linear-gradient(180deg, #faf7ff 0%, #f5f3ff 100%);
+      color: #312e81;
+      padding: 10px 12px;
+    }
+
+    .gantt-project-card {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+
+    .gantt-project-name {
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .gantt-project-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: #6366f1;
+    }
+
+    .gantt-overall-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #ddd6fe;
+      overflow: hidden;
+    }
+
+    .gantt-overall-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%);
+    }
+
+    .gantt-slot {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfaff 100%);
+      padding: 6px;
+    }
+
+    .gantt-slot.done { background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 100%); }
+    .gantt-slot.doing { background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%); }
+    .gantt-slot.todo { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
+    .gantt-slot.empty { background: #fcfbff; color: #c4b5fd; }
+
+    .gantt-state-pill {
+      min-width: 52px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, .10);
+    }
+
+    .gantt-state-pill.phase-gpmb { background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%); }
+    .gantt-state-pill.phase-legal { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); }
+    .gantt-state-pill.phase-build { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+    .gantt-state-pill.phase-mixed { background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%); }
+
+    .gantt-slot.todo .gantt-state-pill {
+      background: #cbd5e1;
+      color: #475569;
+      box-shadow: none;
+    }
+
+    .status {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .st-todo { background: #f0f2f6; color: #555; }
+    .st-doing { background: #e7f0ff; color: #2456a8; }
+    .st-done { background: #def5e5; color: #1d7f45; }
+    .st-warning { background: #fff3d6; color: #9b6b00; }
+    .st-danger { background: #ffdfe0; color: #b42318; }
+
+    /* Highlight dự án điểm nóng */
+    tr.hotspot {
+      background: linear-gradient(90deg, #fff5f5 0%, #ffe8e8 100%) !important;
+      position: relative;
+    }
+
+    tr.hotspot td:first-child::before {
+      content: '🔥';
+      margin-right: 6px;
+    }
+
+    tr.hotspot-warning {
+      background: linear-gradient(90deg, #fffbf0 0%, #fff3d6 100%) !important;
+    }
+
+    tr.hotspot-warning td:first-child::before {
+      content: '⚠️';
+      margin-right: 6px;
+    }
+
+    .hotspot-legend {
+      display: flex;
+      gap: 20px;
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hotspot-legend span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Highlight % */
+    .pct-danger {
+      color: #b42318;
+      font-weight: 700;
+      background: #ffdfe0;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .pct-warning {
+      color: #9b6b00;
+      font-weight: 700;
+      background: #fff3d6;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .pct-over {
+      color: #b42318;
+      font-weight: 700;
+      background: #ffdfe0;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .section-title {
+      margin: 2px 0 10px;
+      font-size: 15px;
+      color: #17325f;
+      font-weight: 700;
+    }
+
+    .page2-subtabs {
+      display: flex;
+      gap: 10px;
+      margin: 4px 0 16px;
+      flex-wrap: wrap;
+    }
+
+    .page2-subtab-btn {
+      border: 1px solid #cfe0fb;
+      background: #f8fbff;
+      color: #31507f;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+
+    .page2-subtab-btn.active {
+      background: linear-gradient(135deg, #1f6feb 0%, #3b82f6 100%);
+      color: #fff;
+      border-color: #1f6feb;
+      box-shadow: 0 6px 16px rgba(31, 111, 235, .18);
+    }
+
+    .page2-subtab-content {
+      display: none;
+    }
+
+    .page2-subtab-content.active {
+      display: block;
+    }
+
+    .mini-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .mini-kpi-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid #e4ecf8;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .mini-kpi-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .doc-overview-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .doc-summary-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid #e1eaf8;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .doc-summary-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .doc-summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid #e8eef8;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .doc-summary-item strong {
+      color: #16325c;
+      font-size: 13px;
+    }
+
+    .doc-summary-item span {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .doc-progress-mini {
+      min-width: 120px;
+      text-align: right;
+    }
+
+    .doc-progress-mini b {
+      display: block;
+      color: #1d4ed8;
+      font-size: 16px;
+    }
+
+    .doc-progress-mini small {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .doc-stage-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .doc-stage-item {
+      border: 1px solid #e6edf8;
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+
+    .doc-stage-item header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .doc-stage-item h4 {
+      margin: 0;
+      font-size: 13px;
+      color: #17325f;
+    }
+
+    .doc-stage-item p {
+      margin: 0;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    .doc-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .doc-chip.ok {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .doc-chip.doing {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .doc-chip.warn {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .doc-chip.danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .doc-priority {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 92px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .doc-priority.high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .doc-priority.medium {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .doc-priority.low {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .doc-note-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .doc-note-card {
+      background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+      border: 1px solid #e4ecf8;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .doc-note-card ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .doc-note-card li {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.45;
+    }
+
+    .mini-kpi-card .value {
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 800;
+      color: #102849;
+      margin-bottom: 4px;
+    }
+
+    .mini-kpi-card .meta {
+      font-size: 12px;
+      color: #5f6f8b;
+    }
+
+    .gauge-shell {
+      position: relative;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-shell canvas {
+      height: 100% !important;
+      max-height: 220px;
+      max-width: 320px;
+    }
+
+    .gauge-center {
+      position: absolute;
+      top: 58%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .gauge-center .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #17325f;
+      line-height: 1;
+    }
+
+    .gauge-center .label {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #6b7890;
+      font-weight: 600;
+    }
+
+    .gantt-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .gantt-head,
+    .gantt-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .gantt-dot.done { background: #10b981; }
+    .gantt-dot.doing { background: #3b82f6; }
+    .gantt-dot.todo { background: #cbd5e1; }
+
+    .gantt-head {
+      margin-bottom: 10px;
+      color: #5e7191;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .gantt-months {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 0;
+    }
+
+    .gantt-months span {
+      text-align: center;
+      padding: 6px 0;
+      border-left: 1px solid #e6ebf2;
+    }
+
+    .gantt-months span:first-child {
+      border-left: none;
+    }
+
+    .gantt-row {
+      margin-bottom: 10px;
+    }
+
+    .gantt-row.group-row {
+      margin-top: 18px;
+      margin-bottom: 12px;
+    }
+
+    .gantt-task {
+      font-size: 13px;
+      font-weight: 600;
+      color: #203556;
+    }
+
+    .gantt-row.group-row .gantt-task {
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .gantt-row.group-row.phase-legal .gantt-task {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .gantt-row.group-row.phase-gpmb .gantt-task {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .gantt-row.group-row.phase-xd .gantt-task {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .gantt-task.subtask {
+      padding-left: 18px;
+      font-weight: 500;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .gantt-task.subtask::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(147, 197, 253, .18);
+    }
+
+    .gantt-row.phase-gpmb .gantt-task.subtask::before {
+      background: #fbbf24;
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, .18);
+    }
+
+    .gantt-row.phase-xd .gantt-task.subtask::before {
+      background: #34d399;
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, .18);
+    }
+
+    .gantt-track {
+      position: relative;
+      height: 34px;
+      border-radius: 10px;
+      background: repeating-linear-gradient(
+        90deg,
+        #f8fbff 0,
+        #f8fbff calc(100% / 12 - 1px),
+        #dbe4f0 calc(100% / 12 - 1px),
+        #dbe4f0 calc(100% / 12)
+      );
+      overflow: hidden;
+    }
+
+    .gantt-row.group-row .gantt-track {
+      height: 38px;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+      border: 1px solid #dbe7f5;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      top: 6px;
+      height: 22px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(15, 39, 77, .12);
+    }
+
+    .gantt-bar.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .gantt-bar.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .gantt-bar.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .gantt-bar.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+    .project-info {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    .info-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .info-box .k {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .info-box .v {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1b2d4d;
+    }
+
+    /* Stat Cards cho trang Chi tiết */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    .project-header {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: stretch;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #1e3a5f;
+      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card.green {
+      background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+      box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2);
+      color: #14532d;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      opacity: 0.9;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .stat-card .stat-sub {
+      font-size: 11px;
+      opacity: 0.85;
+    }
+
+    .stat-card .stat-icon {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 28px;
+      opacity: 0.7;
+    }
+
+    .stat-card.green .stat-icon {
+      opacity: 0.7;
+    }
+
+    /* Cost Legend */
+    .cost-legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .stat-card .stat-progress {
+      margin-top: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 6px;
+      height: 5px;
+      overflow: hidden;
+    }
+
+    .stat-card .stat-progress-bar {
+      height: 100%;
+      background: #1e40af;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .stat-card.green .stat-progress-bar {
+      background: #166534;
+    }
+
+    canvas { width: 100% !important; height: 280px !important; }
+
+    .small-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .toggle-btns {
+      display: flex;
+      gap: 0;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #d0daf0;
+    }
+
+    .toggle-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: #f0f4fb;
+      color: #4a6089;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .toggle-btn:hover {
+      background: #e4ecf9;
+    }
+
+    .toggle-btn.active {
+      background: #1f6feb;
+      color: #fff;
+    }
+
+    .plan-toggle-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin: 12px 0;
+    }
+
+    .next-plan-btn {
+      border: none;
+      background: linear-gradient(135deg, #1f6feb 0%, #1d4ed8 100%);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(29, 78, 216, .22);
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .next-plan-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(29, 78, 216, .28);
+    }
+
+    .next-plan-btn.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0f9b8e 100%);
+      box-shadow: 0 8px 18px rgba(15, 118, 110, .2);
+    }
+
+    .next-month-plan {
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      border: 1px solid #d7e5fb;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .next-month-plan.hidden {
+      display: none;
+    }
+
+    .next-month-plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .next-month-plan-header h3 {
+      margin: 0;
+      font-size: 15px;
+      color: #16325c;
+    }
+
+    .next-month-plan-header .badge {
+      background: #e0ecff;
+      color: #1d4ed8;
+    }
+
+    .next-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .plan-phase-card {
+      background: #fff;
+      border: 1px solid #e3ecfa;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .plan-phase-title {
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .03em;
+    }
+
+    .plan-phase-title.phase-legal {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .plan-phase-title.phase-gpmb {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .plan-phase-title.phase-xd {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .plan-phase-body {
+      padding: 12px 14px 14px;
+    }
+
+    .plan-phase-body ul {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .plan-phase-body li {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.45;
+    }
+
+    .plan-phase-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* Bộ lọc */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      background: #fff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .filter-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #3a5078;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-bar select,
+    .filter-bar input[type="month"] {
+      padding: 8px 12px;
+      border: 1px solid #d0daf0;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #f8fafd;
+      color: #1f2a44;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .filter-bar select:focus,
+    .filter-bar input:focus {
+      outline: none;
+      border-color: #1f6feb;
+      box-shadow: 0 0 0 3px rgba(31,111,235,0.15);
+    }
+
+    .filter-bar .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-bar .btn-apply {
+      padding: 8px 18px;
+      background: #1f6feb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .filter-bar .btn-apply:hover {
+      background: #1758c9;
+    }
+
+    .filter-bar .btn-reset {
+      padding: 8px 14px;
+      background: #f0f2f6;
+      color: #555;
+      border: 1px solid #d0daf0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .filter-bar .btn-reset:hover {
+      background: #e4e8ef;
+    }
+
+    .filter-bar .filter-icon {
+      font-size: 16px;
+    }
+
+    .page-break { display: none; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 2px solid #d0daf0;
+      background: #fff;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #4a6089;
+      background: #f0f4fb;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      background: #e4ecf9;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: #0f274d;
+      border-bottom: 3px solid #1f6feb;
+    }
+
+    .tab-btn .tab-icon {
+      margin-right: 8px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page {
+      border-radius: 0 0 14px 14px;
+      margin-top: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .project-info { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .topbar { position: static; box-shadow: none; }
+      .container { margin: 0; max-width: 100%; }
+      .tabs { display: none; }
+      .page2-subtabs { display: none; }
+      .tab-content { display: block !important; }
+      .page2-subtab-content { display: block !important; }
+      .page { background: #fff; border: none; padding: 8px 0; border-radius: 0; }
+      .card, .table-wrap, .info-box { box-shadow: none; }
+      .page-break {
+        display: block;
+        break-before: page;
+        page-break-before: always;
+      }
+
+      #page1 { order: 1; }
+      .page-break.first-break { order: 2; }
+      #page3 { order: 3; }
+      .page-break.second-break { order: 4; }
+      #page2 { order: 5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>BÁO CÁO QUẢN LÝ DỰ ÁN</h1>
+    <div class="meta">Kỳ báo cáo: Q1/2026 • Cập nhật: 17/03/2026</div>
+  </div>
+
+  <div class="container">
+    <!-- TABS NAVIGATION -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="openTab(event, 'page1')">
+        <span class="tab-icon">📊</span>TRANG 1: TỔNG QUAN
+      </button>
+      <button class="tab-btn" onclick="openTab(event, 'page3')">
+        <span class="tab-icon">📋</span>TRANG 2: QUẢN LÝ DỰ ÁN
+      </button>
+      <button class="tab-btn" onclick="openTab(event, 'page2')">
+        <span class="tab-icon">📄</span>TRANG 3: CHI TIẾT DỰ ÁN
+      </button>
+    </div>
+
+    <!-- PAGE 1 -->
+    <div id="page1" class="tab-content active">
+    <!-- BỘ LỌC TRANG 1 -->
+    <div class="filter-bar">
+      <span class="filter-icon">🔍</span>
+      
+      <div class="filter-group">
+        <label for="filterYear">Năm:</label>
+        <select id="filterYear">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterMonth">Tháng:</label>
+        <select id="filterMonth">
+          <option value="all">Tất cả</option>
+          <option value="1">Tháng 1</option>
+          <option value="2">Tháng 2</option>
+          <option value="3" selected>Tháng 3</option>
+          <option value="4">Tháng 4</option>
+          <option value="5">Tháng 5</option>
+          <option value="6">Tháng 6</option>
+          <option value="7">Tháng 7</option>
+          <option value="8">Tháng 8</option>
+          <option value="9">Tháng 9</option>
+          <option value="10">Tháng 10</option>
+          <option value="11">Tháng 11</option>
+          <option value="12">Tháng 12</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterQuarter">Quý:</label>
+        <select id="filterQuarter">
+          <option value="all">Tất cả</option>
+          <option value="Q1" selected>Q1</option>
+          <option value="Q2">Q2</option>
+          <option value="Q3">Q3</option>
+          <option value="Q4">Q4</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterCompany">Công ty:</label>
+        <select id="filterCompany">
+          <option value="all">Tất cả</option>
+          <option value="hcnh">Công ty A</option>
+          <option value="hcnt">Công ty B</option>
+          <option value="hcnl">Công ty C</option>
+          <option value="qan-group">Công ty D</option>
+          <option value="qan">Công ty E</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterStatus">Trạng thái:</label>
+        <select id="filterStatus">
+          <option value="all">Tất cả</option>
+          <option value="ontrack">Đúng tiến độ</option>
+          <option value="delayed">Chậm tiến độ</option>
+          <option value="over">Vượt giải ngân</option>
+          <option value="done">Hoàn thành</option>
+        </select>
+      </div>
+
+      <button class="btn-apply" onclick="applyFilters()">✔ Áp dụng</button>
+      <button class="btn-reset" onclick="resetFilters()">↻ Đặt lại</button>
+    </div>
+
+    <section class="page">
+      <h2 class="page-title">TỔNG QUAN <span class="badge">Dashboard điều hành</span></h2>
+
+      <div class="kpi-grid">
+        <article class="card">
+          <h3>Ngân sách tổng</h3>
+          <div class="big">1,200 tỷ</div>
+          <div class="sub">
+            <div>Đã sử dụng: <b>735 tỷ</b></div>
+            <div>Còn lại: <b>465 tỷ</b></div>
+            <div>% sử dụng: <b>61.3%</b><span class="pill warn">Theo dõi</span></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Tiến độ giải ngân</h3>
+          <div class="big">58.7%</div>
+          <div class="sub">
+            <div>Kế hoạch: <b>860 tỷ</b></div>
+            <div>Thực tế: <b>505 tỷ</b></div>
+            <div>Chênh lệch: <b>-355 tỷ</b><span class="pill late">Chậm kế hoạch</span></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Hoàn thành công việc</h3>
+          <div class="big">64.8%</div>
+          <div class="sub">
+            <div>Tổng công việc: <b>432</b></div>
+            <div>Đã hoàn thành: <b>280</b></div>
+            <div>Đang triển khai: <b>116</b><span class="pill ok">Khả quan</span></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Tổng số dự án</h3>
+          <div class="big">18 dự án</div>
+          <div class="sub">
+            <div>Đúng tiến độ: <b>12</b><span class="pill ok">66.7%</span></div>
+            <div>Chậm tiến độ: <b>4</b><span class="pill late">22.2%</span></div>
+            <div>Vượt giải ngân: <b>2</b><span class="pill warn">11.1%</span></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <div class="chart-header">
+            <h3 class="section-title" style="margin:0">So sánh kế hoạch vs thực tế giải ngân</h3>
+            <div class="toggle-btns">
+              <button class="toggle-btn active" onclick="toggleDisbursementView('monthly')">Theo tháng</button>
+              <button class="toggle-btn" onclick="toggleDisbursementView('cumulative')">Lũy kế</button>
+            </div>
+          </div>
+          <canvas id="disbursementPlanActual"></canvas>
+          <div class="small-note">Biểu đồ cột + đường %: theo dõi chênh lệch giải ngân để điều chỉnh theo tháng.</div>
+        </article>
+
+        <article class="card">
+          <h3 class="section-title">📊 Ngân sách theo dự án (tỷ đồng)</h3>
+          <canvas id="subsidiaryProgress"></canvas>
+          <div class="small-note">Biểu đồ thanh ngang + đường trung bình: so sánh ngân sách các dự án.</div>
+        </article>
+      </div>
+
+      <!-- BẢNG DANH SÁCH DỰ ÁN -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px;">
+        <h3 class="section-title" style="margin: 0;">Danh sách dự án</h3>
+        <div class="hotspot-legend">
+          <span>🔥 Chậm tiến độ nghiêm trọng</span>
+          <span>⚠️ Vượt giải ngân</span>
+        </div>
+      </div>
+      <article class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên dự án</th>
+              <th>Công ty phụ trách</th>
+              <th class="text-right">Ngân sách (tỷ)</th>
+              <th class="text-right">% Số tiền đã trả</th>
+              <th class="text-right">% Công việc</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Khách sạn Nam Hưng – Marriott</td>
+              <td>Công ty A</td>
+              <td class="text-right">850</td>
+              <td class="text-right">74.3%</td>
+              <td class="text-right">68%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Văn phòng Akyn</td>
+              <td>Công ty B</td>
+              <td class="text-right">420</td>
+              <td class="text-right">82.1%</td>
+              <td class="text-right">79%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr class="hotspot">
+              <td>3</td>
+              <td>The One Central Sale Gallery</td>
+              <td>Công ty A</td>
+              <td class="text-right">1,200</td>
+              <td class="text-right"><span class="pct-danger">45.6%</span></td>
+              <td class="text-right"><span class="pct-danger">42%</span></td>
+              <td><span class="status st-danger">Chậm tiến độ</span></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Sale Gallery Ocean Park 3</td>
+              <td>Công ty A</td>
+              <td class="text-right">650</td>
+              <td class="text-right">67.8%</td>
+              <td class="text-right">71%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Ginza Sushi Ichi Hà Nội</td>
+              <td>Công ty C</td>
+              <td class="text-right">520</td>
+              <td class="text-right">91.4%</td>
+              <td class="text-right">86%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr class="hotspot">
+              <td>6</td>
+              <td>JW Marriott Hotel & Suites Saigon</td>
+              <td>Công ty B</td>
+              <td class="text-right">980</td>
+              <td class="text-right"><span class="pct-danger">38.2%</span></td>
+              <td class="text-right"><span class="pct-danger">35%</span></td>
+              <td><span class="status st-danger">Chậm tiến độ</span></td>
+            </tr>
+            <tr class="hotspot-warning">
+              <td>7</td>
+              <td>Grand Marina Saigon</td>
+              <td>Công ty A</td>
+              <td class="text-right">280</td>
+              <td class="text-right"><span class="pct-over">112.5%</span></td>
+              <td class="text-right">88%</td>
+              <td><span class="status st-warning">Vượt giải ngân</span></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Khách sạn Sheraton Sài Gòn Grand Opera</td>
+              <td>Công ty B</td>
+              <td class="text-right">350</td>
+              <td class="text-right">65.2%</td>
+              <td class="text-right">58%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>DỰ ÁN I</td>
+              <td>Công ty B</td>
+              <td class="text-right">180</td>
+              <td class="text-right">100%</td>
+              <td class="text-right">100%</td>
+              <td><span class="status st-done">Hoàn thành</span></td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>DỰ ÁN J</td>
+              <td>Công ty D</td>
+              <td class="text-right">450</td>
+              <td class="text-right">55.3%</td>
+              <td class="text-right">52%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>DỰ ÁN K</td>
+              <td>Công ty E</td>
+              <td class="text-right">120</td>
+              <td class="text-right">78.5%</td>
+              <td class="text-right">82%</td>
+              <td><span class="status st-doing">Đang triển khai</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="table-wrap" style="margin-top: 12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Tháng</th>
+              <th class="text-right">KH Giải ngân (tỷ)</th>
+              <th class="text-right">TT Giải ngân (tỷ)</th>
+              <th class="text-right">% HT Giải ngân</th>
+              <th class="text-right">KH Công việc</th>
+              <th class="text-right">TT Hoàn thành</th>
+              <th class="text-right">% HT Công việc</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>T1</td><td class="text-right">120</td><td class="text-right">92</td><td class="text-right">76.7%</td><td class="text-right">36</td><td class="text-right">24</td><td class="text-right">66.7%</td></tr>
+            <tr><td>T2</td><td class="text-right">135</td><td class="text-right">101</td><td class="text-right">74.8%</td><td class="text-right">40</td><td class="text-right">26</td><td class="text-right">65.0%</td></tr>
+            <tr><td>T3</td><td class="text-right">145</td><td class="text-right">110</td><td class="text-right">75.9%</td><td class="text-right">45</td><td class="text-right">31</td><td class="text-right">68.9%</td></tr>
+            <tr><td>T4</td><td class="text-right">150</td><td class="text-right">98</td><td class="text-right">65.3%</td><td class="text-right">42</td><td class="text-right">25</td><td class="text-right">59.5%</td></tr>
+            <tr><td>T5</td><td class="text-right">155</td><td class="text-right">104</td><td class="text-right">67.1%</td><td class="text-right">47</td><td class="text-right">30</td><td class="text-right">63.8%</td></tr>
+            <tr><td>T6</td><td class="text-right">155</td><td class="text-right">0</td><td class="text-right">0.0%</td><td class="text-right">50</td><td class="text-right">0</td><td class="text-right">0.0%</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+    </div>
+
+    <div class="page-break first-break"></div>
+
+    <div class="page-break second-break"></div>
+
+    <!-- PAGE 2 -->
+    <div id="page2" class="tab-content">
+    <!-- BỘ LỌC TRANG 2 -->
+    <div class="filter-bar">
+      <span class="filter-icon">🔍</span>
+      
+      <div class="filter-group">
+        <label for="filterYear2">Năm:</label>
+        <select id="filterYear2">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterMonth2">Tháng:</label>
+        <select id="filterMonth2">
+          <option value="all">Tất cả</option>
+          <option value="1">Tháng 1</option>
+          <option value="2">Tháng 2</option>
+          <option value="3" selected>Tháng 3</option>
+          <option value="4">Tháng 4</option>
+          <option value="5">Tháng 5</option>
+          <option value="6">Tháng 6</option>
+          <option value="7">Tháng 7</option>
+          <option value="8">Tháng 8</option>
+          <option value="9">Tháng 9</option>
+          <option value="10">Tháng 10</option>
+          <option value="11">Tháng 11</option>
+          <option value="12">Tháng 12</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterProject">Dự án:</label>
+        <select id="filterProject">
+          <option value="ninhthuy" selected>Khách sạn Nam Hưng – Marriott</option>
+          <option value="namvanphong">Văn phòng Akyn</option>
+          <option value="bacninhhoa">The One Central Sale Gallery</option>
+          <option value="dongbacninhhoa">Sale Gallery Ocean Park 3</option>
+          <option value="ninhlong">Ginza Sushi Ichi Hà Nội</option>
+          <option value="ninhdiem3">JW Marriott Hotel & Suites Saigon</option>
+          <option value="ninhdiem2">Grand Marina Saigon</option>
+          <option value="mokhoangsan">Khách sạn Sheraton Sài Gòn Grand Opera</option>
+          <option value="noxhhoancau">DỰ ÁN I</option>
+          <option value="dulichquocanh">DỰ ÁN J</option>
+          <option value="sodat">DỰ ÁN K</option>
+        </select>
+      </div>
+
+      <button class="btn-apply" onclick="applyFiltersPage2()">✔ Áp dụng</button>
+      <button class="btn-reset" onclick="resetFiltersPage2()">↻ Đặt lại</button>
+    </div>
+
+    <section class="page">
+      <h2 class="page-title">CHI TIẾT DỰ ÁN <span class="badge">Theo dự án & giai đoạn</span></h2>
+
+      <!-- THÔNG TIN + STAT CARDS TRÊN 1 HÀNG -->
+      <div class="project-header">
+        <div class="project-info">
+          <div class="info-box"><div class="k">Tên dự án</div><div class="v">Khách sạn Nam Hưng – Marriott</div></div>
+          <div class="info-box"><div class="k">Công ty phụ trách</div><div class="v">Công ty A</div></div>
+          <div class="info-box"><div class="k">Thời gian</div><div class="v">01/2026 - 12/2027</div></div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card">
+            <span class="stat-icon">💰</span>
+            <div class="stat-label">Thực tế chi / Ngân sách</div>
+            <div class="stat-value">338 / 850 tỷ</div>
+            <div class="stat-sub">Còn lại: 512 tỷ (60.2%)</div>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" style="width: 39.8%"></div>
+            </div>
+          </div>
+          <div class="stat-card green">
+            <span class="stat-icon">✅</span>
+            <div class="stat-label">% Công việc hoàn thành</div>
+            <div class="stat-value">68%</div>
+            <div class="stat-sub">Hoàn thành: 34/50 hạng mục</div>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" style="width: 68%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page2-subtabs">
+        <button class="page2-subtab-btn active" onclick="openPage2Subtab(event, 'page2-overview')">1. Tổng quan</button>
+        <button class="page2-subtab-btn" onclick="openPage2Subtab(event, 'page2-cost-management')">2. Quản lý chi phí</button>
+        <button class="page2-subtab-btn" onclick="openPage2Subtab(event, 'page2-work-progress')">3. Tiến độ công việc</button>
+        <button class="page2-subtab-btn" onclick="openPage2Subtab(event, 'page2-document-management')">4. Quản lý danh mục hồ sơ dự án</button>
+        <button class="page2-subtab-btn" onclick="openPage2Subtab(event, 'page2-budget-approval')">5. Duyệt chi dự án</button>
+      </div>
+
+      <div id="page2-overview" class="page2-subtab-content active">
+
+      <!-- BẢNG KPI 3 NHÓM CHI PHÍ - DẠNG STEPS + BẢNG NGANG -->
+      <h3 class="section-title" style="margin-top: 16px; margin-bottom: 12px;">📊 KPI NGÂN SÁCH THEO NHÓM CHI PHÍ</h3>
+      
+      <!-- 3 NHÓM -->
+      <div style="display: flex; justify-content: center; align-items: center; gap: 0; margin-bottom: 16px; padding: 16px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px;">
+        <!-- NHÓM 1 -->
+        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+          <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);">1</div>
+          <div style="margin-top: 8px; font-weight: 700; color: #b45309; font-size: 13px;">📦 VẬT TƯ</div>
+          <div style="font-size: 16px; font-weight: 800; color: #b45309; line-height: 1.1;">83.7%</div>
+          <div style="font-size: 10px; color: #78716c;">621.4 / 742 tỷ</div>
+        </div>
+        
+        <!-- MŨI TÊN 1 -->
+        <div style="flex: 0.5; height: 4px; background: linear-gradient(90deg, #f59e0b, #3b82f6); border-radius: 2px;"></div>
+        
+        <!-- NHÓM 2 -->
+        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+          <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">2</div>
+          <div style="margin-top: 8px; font-weight: 700; color: #1d4ed8; font-size: 13px;">🔧 NHÀ THẦU</div>
+          <div style="font-size: 16px; font-weight: 800; color: #1d4ed8; line-height: 1.1;">84.9%</div>
+          <div style="font-size: 10px; color: #78716c;">548.3 / 646 tỷ</div>
+        </div>
+        
+        <!-- MŨI TÊN 2 -->
+        <div style="flex: 0.5; height: 4px; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 2px;"></div>
+        
+        <!-- NHÓM 3 -->
+        <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+          <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">3</div>
+          <div style="margin-top: 8px; font-weight: 700; color: #047857; font-size: 13px;">📋 KHÁC</div>
+          <div style="font-size: 16px; font-weight: 800; color: #047857; line-height: 1.1;">61.6%</div>
+          <div style="font-size: 10px; color: #78716c;">137.4 / 223 tỷ</div>
+        </div>
+      </div>
+
+      <!-- BẢNG KPI GỘP 3 NHÓM CHI PHÍ - COMPACT -->
+      <article class="card" style="margin-bottom: 12px; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+          <thead>
+            <tr>
+              <th rowspan="2" style="padding: 6px 4px; text-align: left; border: 1px solid #e6ebf2; background: #f1f5f9; vertical-align: middle; width: 70px;"></th>
+              <th colspan="2" style="padding: 6px 4px; text-align: center; border: 1px solid #d97706; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 10px;">📦 Vật tư</th>
+              <th colspan="2" style="padding: 6px 4px; text-align: center; border: 1px solid #2563eb; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; font-size: 10px;">🔧 Nhà thầu</th>
+              <th colspan="2" style="padding: 6px 4px; text-align: center; border: 1px solid #059669; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 10px;">📋 Khác</th>
+            </tr>
+            <tr style="background: #f8fafc; font-size: 9px;">
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #fde68a; background: #fffbeb;">KH (tỷ)</th>
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #fde68a; background: #fffbeb;">TT (tỷ)</th>
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #bfdbfe; background: #eff6ff;">KH (tỷ)</th>
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #bfdbfe; background: #eff6ff;">TT (tỷ)</th>
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #a7f3d0; background: #ecfdf5;">KH (tỷ)</th>
+              <th style="padding: 4px 3px; text-align: right; border: 1px solid #a7f3d0; background: #ecfdf5;">TT (tỷ)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 4px 3px; border: 1px solid #e6ebf2; font-weight: 600;">Chỉ tiêu</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">742</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">621.4</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">646</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">548.3</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">223</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #e6ebf2;">137.4</td>
+            </tr>
+            <tr style="font-weight: 700;">
+              <td style="padding: 4px 3px; border: 1px solid #9ca3af; color: #374151;">Tỷ trọng</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fde68a 100%); color: #b45309;">47.6%</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #f59e0b; background: linear-gradient(135deg, #fff7ed 0%, #fdba74 100%); color: #9a3412;">83.7%</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #3b82f6; background: linear-gradient(135deg, #eff6ff 0%, #bfdbfe 100%); color: #1d4ed8;">49.4%</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #3b82f6; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); color: #1d4ed8;">84.9%</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%); color: #047857;">17.1%</td>
+              <td style="padding: 4px 3px; text-align: right; border: 1px solid #10b981; background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%); color: #047857;">61.6%</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 6px; font-size: 9px; color: #6b7280; font-style: italic;">* Đơn vị: Tỷ đồng (trừ cột Diện tích)</div>
+      </article>
+
+      <!-- BIỂU ĐỒ DOANH THU - CHI PHÍ - LỢI NHUẬN -->
+      <article class="card" style="margin-bottom: 12px;">
+        <div class="chart-header">
+          <h3 class="section-title" style="margin:0;">💹 Doanh thu - Chi phí - Lợi nhuận</h3>
+          <div class="toggle-btns">
+            <button class="toggle-btn active" onclick="toggleRevenueCostView('monthly')">Theo tháng</button>
+            <button class="toggle-btn" onclick="toggleRevenueCostView('cumulative')">Lũy kế</button>
+          </div>
+        </div>
+        <div style="height: 320px;">
+          <canvas id="revenueCostProfitChart"></canvas>
+        </div>
+        <div class="small-note">Biểu đồ so sánh doanh thu, chi phí và lợi nhuận theo từng tháng trong năm 2026.</div>
+      </article>
+
+      <!-- BIỂU ĐỒ TỶ LỆ GIẢI NGÂN - TO HƠN -->
+      <article class="card" style="margin-bottom: 12px;">
+        <h3 class="section-title">Tỷ lệ giải ngân theo thời gian</h3>
+        <div style="height: 320px;">
+          <canvas id="monthlyDisbursementRate"></canvas>
+        </div>
+      </article>
+
+      </div>
+
+      <div id="page2-cost-management" class="page2-subtab-content">
+        <!-- BIỂU ĐỒ VẬT TƯ THEO THỜI GIAN -->
+        <div class="grid-2" style="margin-bottom:14px;">
+          <article class="card" style="grid-column: 1 / -1;">
+            <h3 class="section-title">📦 Chi phí theo nhóm và thời gian</h3>
+            <div style="height: 310px;">
+              <canvas id="page2CostBudgetMixChart"></canvas>
+            </div>
+            <div class="small-note">Bar ngang hiển thị tỷ lệ giải ngân thực tế so với kế hoạch theo 3 nhóm: Vật tư, Nhà thầu, Khác.</div>
+          </article>
+        </div>
+
+        <!-- CẢNH BÁO VƯỢT MỨC -->
+        <div id="costAlertBanner" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+        <!-- BẢNG VẬT TƯ THEO THÁNG -->
+        <article class="table-wrap" style="margin-bottom:14px;border-color:#f59e0b;background:linear-gradient(180deg,#fffef2 0%,#fff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">📦 Vật tư — Chi phí theo tháng</h3>
+            <span class="badge" style="background:#fef3c7;color:#b45309;">Ngân sách: 742 tỷ | Thực tế: 621.4 tỷ (83.7%)</span>
+          </div>
+          <table id="vattuTable">
+            <thead>
+              <tr>
+                <th style="min-width:260px;">Hạng mục vật tư</th>
+                <th class="text-right">Ngân sách</th>
+                <th class="text-right">Tổng TT</th>
+                <th class="text-right">T1</th><th class="text-right">T2</th><th class="text-right">T3</th>
+                <th class="text-right">T4</th><th class="text-right">T5</th><th class="text-right">T6</th>
+                <th class="text-right">T7</th><th class="text-right">T8</th><th class="text-right">T9</th>
+                <th class="text-right">T10</th><th class="text-right">T11</th><th class="text-right">T12</th>
+                <th>Tình trạng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="tree-parent" data-budget="320" data-actual="312.5">
+                <td><span class="tree-code">VT1</span> Vật tư chính (FF&amp;E / OS&amp;E)</td>
+                <td class="text-right bgt">320</td><td class="text-right act">312.5</td>
+                <td class="text-right">28</td><td class="text-right">31</td><td class="text-right">30</td>
+                <td class="text-right">32</td><td class="text-right">35</td><td class="text-right">33</td>
+                <td class="text-right">27</td><td class="text-right">26</td><td class="text-right">25</td>
+                <td class="text-right">24</td><td class="text-right">22</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="180" data-actual="175">
+                <td><span class="tree-code">VT1.1</span> FF&amp;E — Nội thất, thiết bị cố định</td>
+                <td class="text-right bgt">180</td><td class="text-right act">175</td>
+                <td class="text-right">16</td><td class="text-right">18</td><td class="text-right">17</td>
+                <td class="text-right">18</td><td class="text-right">20</td><td class="text-right">19</td>
+                <td class="text-right">15</td><td class="text-right">14</td><td class="text-right">14</td>
+                <td class="text-right">14</td><td class="text-right">10</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="140" data-actual="137.5">
+                <td><span class="tree-code">VT1.2</span> OS&amp;E — Thiết bị vận hành &amp; tiêu hao</td>
+                <td class="text-right bgt">140</td><td class="text-right act">137.5</td>
+                <td class="text-right">12</td><td class="text-right">13</td><td class="text-right">13</td>
+                <td class="text-right">14</td><td class="text-right">15</td><td class="text-right">14</td>
+                <td class="text-right">12</td><td class="text-right">12</td><td class="text-right">11</td>
+                <td class="text-right">10</td><td class="text-right">12</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="180" data-actual="185">
+                <td><span class="tree-code">VT2</span> Vật tư xây dựng &amp; hoàn thiện</td>
+                <td class="text-right bgt">180</td><td class="text-right act">185</td>
+                <td class="text-right">14</td><td class="text-right">16</td><td class="text-right">15</td>
+                <td class="text-right">17</td><td class="text-right">18</td><td class="text-right">17</td>
+                <td class="text-right">16</td><td class="text-right">17</td><td class="text-right">18</td>
+                <td class="text-right">17</td><td class="text-right">20</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="110" data-actual="115">
+                <td><span class="tree-code">VT2.1</span> Vật liệu xây dựng (xi măng, sắt, gạch…)</td>
+                <td class="text-right bgt">110</td><td class="text-right act">115</td>
+                <td class="text-right">8</td><td class="text-right">10</td><td class="text-right">9</td>
+                <td class="text-right">10</td><td class="text-right">11</td><td class="text-right">10</td>
+                <td class="text-right">10</td><td class="text-right">11</td><td class="text-right">12</td>
+                <td class="text-right">11</td><td class="text-right">13</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="70" data-actual="70">
+                <td><span class="tree-code">VT2.2</span> Vật liệu hoàn thiện (sơn, ốp lát, trần...)</td>
+                <td class="text-right bgt">70</td><td class="text-right act">70</td>
+                <td class="text-right">6</td><td class="text-right">6</td><td class="text-right">6</td>
+                <td class="text-right">7</td><td class="text-right">7</td><td class="text-right">7</td>
+                <td class="text-right">6</td><td class="text-right">6</td><td class="text-right">6</td>
+                <td class="text-right">6</td><td class="text-right">7</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="140" data-actual="112">
+                <td><span class="tree-code">VT3</span> Thiết bị MEP &amp; kỹ thuật</td>
+                <td class="text-right bgt">140</td><td class="text-right act">112</td>
+                <td class="text-right">8</td><td class="text-right">9</td><td class="text-right">9</td>
+                <td class="text-right">10</td><td class="text-right">11</td><td class="text-right">10</td>
+                <td class="text-right">10</td><td class="text-right">11</td><td class="text-right">10</td>
+                <td class="text-right">10</td><td class="text-right">14</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="80" data-actual="62">
+                <td><span class="tree-code">VT3.1</span> Hệ thống điện, nước, HVAC</td>
+                <td class="text-right bgt">80</td><td class="text-right act">62</td>
+                <td class="text-right">5</td><td class="text-right">5</td><td class="text-right">5</td>
+                <td class="text-right">6</td><td class="text-right">6</td><td class="text-right">5</td>
+                <td class="text-right">6</td><td class="text-right">6</td><td class="text-right">5</td>
+                <td class="text-right">5</td><td class="text-right">2</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="60" data-actual="50">
+                <td><span class="tree-code">VT3.2</span> Thiết bị phòng cháy, an ninh, AV</td>
+                <td class="text-right bgt">60</td><td class="text-right act">50</td>
+                <td class="text-right">3</td><td class="text-right">4</td><td class="text-right">4</td>
+                <td class="text-right">4</td><td class="text-right">5</td><td class="text-right">5</td>
+                <td class="text-right">4</td><td class="text-right">5</td><td class="text-right">5</td>
+                <td class="text-right">5</td><td class="text-right">12</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="102" data-actual="11.9">
+                <td><span class="tree-code">VT4</span> Vật tư phụ &amp; tiêu hao công trường</td>
+                <td class="text-right bgt">102</td><td class="text-right act">11.9</td>
+                <td class="text-right">1.0</td><td class="text-right">1.0</td><td class="text-right">1.1</td>
+                <td class="text-right">1.1</td><td class="text-right">1.2</td><td class="text-right">1.2</td>
+                <td class="text-right">1.1</td><td class="text-right">1.1</td><td class="text-right">1.1</td>
+                <td class="text-right">1.0</td><td class="text-right">0.0</td><td class="text-right">0.0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="detail-total-row" data-budget="742" data-actual="621.4">
+                <td>TỔNG VẬT TƯ</td>
+                <td class="text-right bgt">742</td><td class="text-right act">621.4</td>
+                <td class="text-right">51</td><td class="text-right">57</td><td class="text-right">55</td>
+                <td class="text-right">60</td><td class="text-right">65</td><td class="text-right">61</td>
+                <td class="text-right">54</td><td class="text-right">55</td><td class="text-right">54</td>
+                <td class="text-right">52</td><td class="text-right">56</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <!-- BẢNG NHÀ THẦU THEO THÁNG -->
+        <article class="table-wrap" style="margin-bottom:14px;border-color:#3b82f6;background:linear-gradient(180deg,#f3fbff 0%,#fff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">🔧 Nhà thầu — Chi phí theo tháng</h3>
+            <span class="badge" style="background:#dbeafe;color:#1e3a8a;">Ngân sách: 646 tỷ | Thực tế: 548.3 tỷ (84.9%)</span>
+          </div>
+          <table id="nhathauTable">
+            <thead>
+              <tr>
+                <th style="min-width:260px;">Hạng mục nhà thầu</th>
+                <th class="text-right">Ngân sách</th>
+                <th class="text-right">Tổng TT</th>
+                <th class="text-right">T1</th><th class="text-right">T2</th><th class="text-right">T3</th>
+                <th class="text-right">T4</th><th class="text-right">T5</th><th class="text-right">T6</th>
+                <th class="text-right">T7</th><th class="text-right">T8</th><th class="text-right">T9</th>
+                <th class="text-right">T10</th><th class="text-right">T11</th><th class="text-right">T12</th>
+                <th>Tình trạng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="tree-parent" data-budget="280" data-actual="285">
+                <td><span class="tree-code">NT1</span> Nhà thầu thi công chính (GC)</td>
+                <td class="text-right bgt">280</td><td class="text-right act">285</td>
+                <td class="text-right">22</td><td class="text-right">25</td><td class="text-right">24</td>
+                <td class="text-right">26</td><td class="text-right">28</td><td class="text-right">27</td>
+                <td class="text-right">25</td><td class="text-right">26</td><td class="text-right">27</td>
+                <td class="text-right">25</td><td class="text-right">30</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="160" data-actual="165">
+                <td><span class="tree-code">NT1.1</span> Nhà thầu xây dựng &amp; hoàn thiện</td>
+                <td class="text-right bgt">160</td><td class="text-right act">165</td>
+                <td class="text-right">13</td><td class="text-right">14</td><td class="text-right">14</td>
+                <td class="text-right">15</td><td class="text-right">16</td><td class="text-right">15</td>
+                <td class="text-right">14</td><td class="text-right">15</td><td class="text-right">15</td>
+                <td class="text-right">14</td><td class="text-right">20</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="120" data-actual="120">
+                <td><span class="tree-code">NT1.2</span> Nhà thầu MEP</td>
+                <td class="text-right bgt">120</td><td class="text-right act">120</td>
+                <td class="text-right">9</td><td class="text-right">11</td><td class="text-right">10</td>
+                <td class="text-right">11</td><td class="text-right">12</td><td class="text-right">12</td>
+                <td class="text-right">11</td><td class="text-right">11</td><td class="text-right">12</td>
+                <td class="text-right">11</td><td class="text-right">10</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="220" data-actual="198">
+                <td><span class="tree-code">NT2</span> Thầu phụ chuyên ngành</td>
+                <td class="text-right bgt">220</td><td class="text-right act">198</td>
+                <td class="text-right">16</td><td class="text-right">18</td><td class="text-right">17</td>
+                <td class="text-right">19</td><td class="text-right">20</td><td class="text-right">19</td>
+                <td class="text-right">18</td><td class="text-right">19</td><td class="text-right">18</td>
+                <td class="text-right">17</td><td class="text-right">17</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="100" data-actual="92">
+                <td><span class="tree-code">NT2.1</span> Thầu phụ FF&amp;E lắp đặt</td>
+                <td class="text-right bgt">100</td><td class="text-right act">92</td>
+                <td class="text-right">7</td><td class="text-right">8</td><td class="text-right">8</td>
+                <td class="text-right">9</td><td class="text-right">9</td><td class="text-right">8</td>
+                <td class="text-right">8</td><td class="text-right">9</td><td class="text-right">8</td>
+                <td class="text-right">8</td><td class="text-right">8</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-level-1" data-budget="120" data-actual="106">
+                <td><span class="tree-code">NT2.2</span> Thầu phụ cảnh quan, ngoại thất</td>
+                <td class="text-right bgt">120</td><td class="text-right act">106</td>
+                <td class="text-right">9</td><td class="text-right">10</td><td class="text-right">9</td>
+                <td class="text-right">10</td><td class="text-right">11</td><td class="text-right">11</td>
+                <td class="text-right">10</td><td class="text-right">10</td><td class="text-right">10</td>
+                <td class="text-right">9</td><td class="text-right">7</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="146" data-actual="65.3">
+                <td><span class="tree-code">NT3</span> Nhà thầu tư vấn &amp; giám sát</td>
+                <td class="text-right bgt">146</td><td class="text-right act">65.3</td>
+                <td class="text-right">5</td><td class="text-right">6</td><td class="text-right">5</td>
+                <td class="text-right">6</td><td class="text-right">7</td><td class="text-right">6</td>
+                <td class="text-right">6</td><td class="text-right">6</td><td class="text-right">6</td>
+                <td class="text-right">5</td><td class="text-right">6</td><td class="text-right">1.3</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="detail-total-row" data-budget="646" data-actual="548.3">
+                <td>TỔNG NHÀ THẦU</td>
+                <td class="text-right bgt">646</td><td class="text-right act">548.3</td>
+                <td class="text-right">43</td><td class="text-right">49</td><td class="text-right">46</td>
+                <td class="text-right">51</td><td class="text-right">55</td><td class="text-right">52</td>
+                <td class="text-right">49</td><td class="text-right">51</td><td class="text-right">51</td>
+                <td class="text-right">47</td><td class="text-right">53</td><td class="text-right">1.3</td>
+                <td class="status-cell"></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <!-- BẢNG KHÁC THEO THÁNG -->
+        <article class="table-wrap" style="border-color:#10b981;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">📋 Khác — Chi phí theo tháng</h3>
+            <span class="badge" style="background:#dcfce7;color:#166534;">Ngân sách: 223 tỷ | Thực tế: 137.4 tỷ (61.6%)</span>
+          </div>
+          <table id="khacTable">
+            <thead>
+              <tr>
+                <th style="min-width:260px;">Hạng mục khác</th>
+                <th class="text-right">Ngân sách</th>
+                <th class="text-right">Tổng TT</th>
+                <th class="text-right">T1</th><th class="text-right">T2</th><th class="text-right">T3</th>
+                <th class="text-right">T4</th><th class="text-right">T5</th><th class="text-right">T6</th>
+                <th class="text-right">T7</th><th class="text-right">T8</th><th class="text-right">T9</th>
+                <th class="text-right">T10</th><th class="text-right">T11</th><th class="text-right">T12</th>
+                <th>Tình trạng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="tree-parent" data-budget="60" data-actual="55">
+                <td><span class="tree-code">KH1</span> Chi phí Prelims (văn phòng CT, điện nước, an ninh...)</td>
+                <td class="text-right bgt">60</td><td class="text-right act">55</td>
+                <td class="text-right">4.5</td><td class="text-right">5.0</td><td class="text-right">4.8</td>
+                <td class="text-right">5.2</td><td class="text-right">5.5</td><td class="text-right">5.0</td>
+                <td class="text-right">5.0</td><td class="text-right">5.0</td><td class="text-right">5.0</td>
+                <td class="text-right">5.0</td><td class="text-right">5.0</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="75" data-actual="46">
+                <td><span class="tree-code">KH2</span> Chi phí quản lý dự án (PM Fee, lương BCH)</td>
+                <td class="text-right bgt">75</td><td class="text-right act">46</td>
+                <td class="text-right">3.8</td><td class="text-right">4.0</td><td class="text-right">3.8</td>
+                <td class="text-right">4.2</td><td class="text-right">4.5</td><td class="text-right">4.2</td>
+                <td class="text-right">4.2</td><td class="text-right">4.2</td><td class="text-right">4.2</td>
+                <td class="text-right">4.2</td><td class="text-right">4.7</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="40" data-actual="21.4">
+                <td><span class="tree-code">KH3</span> Bảo hiểm công trình (CAR, TPL)</td>
+                <td class="text-right bgt">40</td><td class="text-right act">21.4</td>
+                <td class="text-right">1.8</td><td class="text-right">1.9</td><td class="text-right">1.8</td>
+                <td class="text-right">2.0</td><td class="text-right">2.1</td><td class="text-right">2.0</td>
+                <td class="text-right">2.0</td><td class="text-right">2.0</td><td class="text-right">2.0</td>
+                <td class="text-right">2.0</td><td class="text-right">1.8</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="tree-parent" data-budget="48" data-actual="72">
+                <td><span class="tree-code">KH4</span> Chi phí phát sinh &amp; dự phòng (VO)</td>
+                <td class="text-right bgt">48</td><td class="text-right act">72</td>
+                <td class="text-right">5.5</td><td class="text-right">6.0</td><td class="text-right">5.8</td>
+                <td class="text-right">6.5</td><td class="text-right">7.2</td><td class="text-right">7.0</td>
+                <td class="text-right">7.0</td><td class="text-right">7.0</td><td class="text-right">6.5</td>
+                <td class="text-right">6.5</td><td class="text-right">7.5</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+              <tr class="detail-total-row" data-budget="223" data-actual="137.4" data-warn="true">
+                <td>TỔNG KHÁC</td>
+                <td class="text-right bgt">223</td><td class="text-right act">137.4</td>
+                <td class="text-right">15.6</td><td class="text-right">16.9</td><td class="text-right">16.2</td>
+                <td class="text-right">17.9</td><td class="text-right">19.3</td><td class="text-right">18.2</td>
+                <td class="text-right">18.2</td><td class="text-right">18.2</td><td class="text-right">17.7</td>
+                <td class="text-right">17.7</td><td class="text-right">19.0</td><td class="text-right">0</td>
+                <td class="status-cell"></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+
+      <div id="page2-work-progress" class="page2-subtab-content">
+        <div class="mini-kpi-grid">
+          <article class="mini-kpi-card">
+            <div class="label">Tổng số công việc</div>
+            <div class="value">50</div>
+            <div class="meta">Toàn bộ hạng mục trong kỳ</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Hoàn thành</div>
+            <div class="value">34</div>
+            <div class="meta">68% tổng công việc</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Đang thực hiện</div>
+            <div class="value">11</div>
+            <div class="meta">22% cần bám sát</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Tiến độ dự án</div>
+            <div class="value">68%</div>
+            <div class="meta">Theo mốc quý I/2026</div>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <article class="card">
+            <h3 class="section-title">Số công việc và tỷ lệ hoàn thành theo tháng</h3>
+            <div style="height: 300px;">
+              <canvas id="page2TaskMonthlyChart"></canvas>
+            </div>
+          </article>
+          <article class="card">
+            <h3 class="section-title">Số công việc hoàn thành theo giai đoạn</h3>
+            <div style="height: 300px;">
+              <canvas id="page2DepartmentTaskChart"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <div class="plan-toggle-bar">
+          <button id="nextMonthPlanBtn" class="next-plan-btn" type="button" onclick="toggleNextMonthPlan()">Kế hoạch tháng tới</button>
+        </div>
+        <article id="nextMonthPlanPanel" class="next-month-plan hidden">
+          <div class="next-month-plan-header">
+            <h3>Danh sách công việc cần làm tháng tới</h3>
+            <span class="badge">T4/2026 • Trọng tâm triển khai dự án</span>
+          </div>
+          <div class="next-plan-grid">
+            <div class="plan-phase-card">
+              <div class="plan-phase-title phase-legal">I. Đấu thầu</div>
+              <div class="plan-phase-body">
+                <ul>
+                  <li>Hoàn thiện pháp lý và ký kết hợp đồng (I.4.1)</li>
+                  <li>Xây dựng ngân sách dự án: Prelims, mua hàng, sản xuất, thi công (I.4.2)</li>
+                </ul>
+                <div class="plan-phase-note">Ưu tiên khóa hợp đồng để khởi động giai đoạn triển khai.</div>
+              </div>
+            </div>
+            <div class="plan-phase-card">
+              <div class="plan-phase-title phase-gpmb">II. Triển khai dự án</div>
+              <div class="plan-phase-body">
+                <ul>
+                  <li>Kick-off dự án (II.1) — họp khởi động nội bộ &amp; CĐT</li>
+                  <li>Lập Master Schedule, kế hoạch trình mẫu, kế hoạch đặt hàng PRO (II.2.1.1–4)</li>
+                  <li>Chuẩn bị nhân sự BCH, dòng tiền dự án (II.2.2.1–3)</li>
+                </ul>
+                <div class="plan-phase-note">Phải hoàn thành chuẩn bị nguồn lực trước khi thi công.</div>
+              </div>
+            </div>
+            <div class="plan-phase-card">
+              <div class="plan-phase-title phase-xd">III. Bảo hành</div>
+              <div class="plan-phase-body">
+                <ul>
+                  <li>Theo dõi hạng mục bảo hành phát sinh (III.1)</li>
+                  <li>Lưu hồ sơ pháp lý, văn bản hành chính (III.2)</li>
+                </ul>
+                <div class="plan-phase-note">Giai đoạn này áp dụng cho các dự án đã bàn giao.</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- GANTT CHART - 3 GIAI ĐOẠN THEO RACI -->
+        <article class="gantt-card" style="margin-top: 12px;">
+          <h3 class="section-title">Gantt chart theo giai đoạn (Theo RACI Sendecor)</h3>
+          <div class="gantt-head">
+            <div>Giai đoạn / Công việc</div>
+            <div class="gantt-months">
+              <span>T1</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>T8</span><span>T9</span><span>T10</span><span>T11</span><span>T12</span>
+            </div>
+          </div>
+
+          <!-- GIAI ĐOẠN I: ĐẤU THẦU -->
+          <div class="gantt-row group-row phase-legal">
+            <div class="gantt-task">I. GIAI ĐOẠN ĐẤU THẦU</div>
+            <div class="gantt-track"><div class="gantt-bar blue" style="left:0%;width:25%;">T1 - T3</div></div>
+          </div>
+          <div class="gantt-row phase-legal">
+            <div class="gantt-task subtask">I.1 Tiếp xúc KH &amp; thu thập thông tin đấu thầu</div>
+            <div class="gantt-track"><div class="gantt-bar blue" style="left:0%;width:8.33%;">T1</div></div>
+          </div>
+          <div class="gantt-row phase-legal">
+            <div class="gantt-task subtask">I.2 Kick-off đấu thầu</div>
+            <div class="gantt-track"><div class="gantt-bar blue" style="left:8.33%;width:8.33%;">T2</div></div>
+          </div>
+          <div class="gantt-row phase-legal">
+            <div class="gantt-task subtask">I.3 Triển khai đấu thầu (HS kỹ thuật, tài chính, khác)</div>
+            <div class="gantt-track"><div class="gantt-bar blue" style="left:8.33%;width:16.66%;">T2 - T3</div></div>
+          </div>
+          <div class="gantt-row phase-legal">
+            <div class="gantt-task subtask">I.4 Phỏng vấn thầu, chốt Deal &amp; ký kết HĐ, lập ngân sách DA</div>
+            <div class="gantt-track"><div class="gantt-bar blue" style="left:16.66%;width:16.66%;">T3 - T4</div></div>
+          </div>
+
+          <!-- GIAI ĐOẠN II: TRIỂN KHAI -->
+          <div class="gantt-row group-row phase-xd">
+            <div class="gantt-task">II. GIAI ĐOẠN TRIỂN KHAI DỰ ÁN</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:25%;width:66.66%;">T4 - T11</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.1 Kick-off dự án</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:25%;width:8.33%;">T4</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.2.1 Kế hoạch (Master Schedule, trình mẫu, trình shop, đặt hàng PRO/NM, họp kỹ thuật)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:25%;width:16.66%;">T4 - T5</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.2.2 Chuẩn bị nguồn lực (Nhân sự BCH, nhân lực, dòng tiền, máy móc)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:25%;width:16.66%;">T4 - T5</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.1 Mua hàng &amp; quản lý thầu phụ/NCC</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:50%;">T5 - T10</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.2 Đặt hàng sản xuất (Nhà máy)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:41.66%;">T5 - T9</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.4 Hồ sơ đệ trình (RFI, mẫu vật tư, bản vẽ D&amp;B / thi công / hoàn công)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:50%;">T5 - T10</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.7 Quản lý tiến độ (tổng, chi tiết, phối hợp, báo cáo CĐT)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:58.33%;">T5 - T11</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.8 Quản lý chất lượng (nhật ký, ITP, nghiệm thu, NCR, bàn giao)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:58.33%;">T5 - T11</div></div>
+          </div>
+          <div class="gantt-row phase-xd">
+            <div class="gantt-task subtask">II.3.9 Quản lý tài chính (IPC, VO, dòng tiền, quyết toán, bảo lãnh)</div>
+            <div class="gantt-track"><div class="gantt-bar green" style="left:33.33%;width:58.33%;">T5 - T11</div></div>
+          </div>
+
+          <!-- GIAI ĐOẠN III: BẢO HÀNH -->
+          <div class="gantt-row group-row phase-gpmb">
+            <div class="gantt-task">III. GIAI ĐOẠN BẢO HÀNH &amp; KẾT THÚC</div>
+            <div class="gantt-track"><div class="gantt-bar orange" style="left:83.33%;width:16.66%;">T11 - T12</div></div>
+          </div>
+          <div class="gantt-row phase-gpmb">
+            <div class="gantt-task subtask">III.1 ASS - Bảo hành</div>
+            <div class="gantt-track"><div class="gantt-bar orange" style="left:83.33%;width:16.66%;">T11 - T12</div></div>
+          </div>
+          <div class="gantt-row phase-gpmb">
+            <div class="gantt-task subtask">III.2 Văn bản hành chính, pháp lý</div>
+            <div class="gantt-track"><div class="gantt-bar orange" style="left:83.33%;width:16.66%;">T11 - T12</div></div>
+          </div>
+          <div class="gantt-row phase-gpmb" style="margin-bottom:0;">
+            <div class="gantt-task subtask">III.3 Quản lý vật tư, tài sản, CCDC &amp; thông tin bảo hành</div>
+            <div class="gantt-track"><div class="gantt-bar orange" style="left:83.33%;width:16.66%;">T11 - T12</div></div>
+          </div>
+        </article>
+
+        <!-- BẢNG TIẾN ĐỘ CÔNG VIỆC THEO RACI -->
+        <article class="table-wrap" style="margin-top:14px;">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">📋 Tiến độ chi tiết công việc theo giai đoạn</h3>
+            <span class="badge">Theo RACI Sendecor • T3/2026</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:70px;">Mã</th>
+                <th>Nhiệm vụ / Công việc</th>
+                <th style="width:110px;">Trạng thái</th>
+                <th class="text-right" style="width:80px;">% HT</th>
+                <th style="width:130px;">Hạn hoàn thành</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- GIAI ĐOẠN I -->
+              <tr style="background:linear-gradient(90deg,#eff6ff,#dbeafe);font-weight:800;color:#1d4ed8;">
+                <td>I</td><td colspan="4">GIAI ĐOẠN ĐẤU THẦU</td>
+              </tr>
+              <tr><td>I.1</td><td>Tiếp xúc khách hàng và thu thập thông tin đấu thầu</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T1/2026</td></tr>
+              <tr><td>I.2</td><td>Kick-off đấu thầu</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T2/2026</td></tr>
+              <tr><td>I.3</td><td>Triển khai đấu thầu</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T2/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">I.3.1</td><td>Hồ sơ kỹ thuật (khảo sát, tiến độ, biểu đồ nhân lực, BPTC…)</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T2/2026</td></tr>
+              <tr><td style="padding-left:28px;">I.3.2</td><td>Hồ sơ tài chính (Báo giá, Trình mẫu vật liệu)</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T2/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">I.3.3</td><td>Hồ sơ khác (pháp lý, tài chính, năng lực, HĐ tương tự, thư đánh giá…)</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T2/2026</td></tr>
+              <tr><td>I.4</td><td>Phỏng vấn thầu và chốt Deal</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T3/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">I.4.1</td><td>Hoàn thiện pháp lý và ký kết hợp đồng</td><td><span class="doc-chip ok">Hoàn tất</span></td><td class="text-right">100%</td><td>T3/2026</td></tr>
+              <tr><td style="padding-left:28px;">I.4.2</td><td>Xây dựng ngân sách dự án (Prelims, mua hàng, sản xuất, thi công…)</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">80%</td><td>T4/2026</td></tr>
+
+              <!-- GIAI ĐOẠN II -->
+              <tr style="background:linear-gradient(90deg,#ecfdf5,#d1fae5);font-weight:800;color:#047857;">
+                <td>II</td><td colspan="4">GIAI ĐOẠN TRIỂN KHAI DỰ ÁN</td>
+              </tr>
+              <tr><td>II.1</td><td>Kick-off dự án</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">60%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td>II.2</td><td>Chuẩn bị dự án</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">40%</td><td>T4/2026</td></tr>
+              <tr><td style="padding-left:28px;">II.2.1</td><td>Kế hoạch</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">50%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:44px;">II.2.1.1</td><td>Kế hoạch thi công tổng (Master Schedule)</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">70%</td><td>T4/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.1.2</td><td>Kế hoạch trình mẫu</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">30%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:44px;">II.2.1.3</td><td>Kế hoạch trình shop drawing</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">20%</td><td>T4/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.1.4</td><td>Kế hoạch đặt hàng PRO (Thầu phụ, NCC, Máy móc, TBVT phụ…)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">25%</td><td>T5/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:44px;">II.2.1.5</td><td>Kế hoạch đặt hàng Nhà máy</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">20%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.1.6</td><td>Họp kỹ thuật (BCH, Nhà máy, Shop drawing)</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">40%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">II.2.2</td><td>Chuẩn bị nguồn lực</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">35%</td><td>T4/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.2.1</td><td>Nhân sự BCH dự án</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">50%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:44px;">II.2.2.2</td><td>Nhân lực (công nhật)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">20%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.2.3</td><td>Dòng tiền dự án</td><td><span class="doc-chip doing">Đang xử lý</span></td><td class="text-right">40%</td><td>T4/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:44px;">II.2.2.4</td><td>Máy móc thiết bị, CCDC phục vụ thi công</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">10%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:44px;">II.2.2.5</td><td>Máy móc văn phòng, VPP phục vụ công trường</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">10%</td><td>T5/2026</td></tr>
+              <tr style="background:linear-gradient(90deg,#f0fdf4,#f8fafc);font-weight:700;color:#047857;"><td>II.3</td><td colspan="4">Giai đoạn triển khai thi công</td></tr>
+              <tr><td style="padding-left:28px;">II.3.1</td><td>Mua hàng và quản lý thầu phụ (ký HĐ TP/NCC, thanh toán, VTPH)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">5%</td><td>T5/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">II.3.2</td><td>Đặt hàng sản xuất (Yêu cầu SX, NM đặt VT, Sản xuất hàng hóa)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:28px;">II.3.4</td><td>Hồ sơ đệ trình (RFI, mẫu VT, bản vẽ D&amp;B/TC/HC, PDT)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">II.3.5</td><td>Biên bản họp (CĐT, thiết kế, tư vấn, MC/NSC, NCC/TP, nội bộ)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:28px;">II.3.6</td><td>Hồ sơ hành chính &amp; pháp lý (nhân sự, CN, HĐ thuê, pháp lý khác)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">II.3.7</td><td>Quản lý tiến độ (tổng, chi tiết, phối hợp, báo cáo CĐT)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr><td style="padding-left:28px;">II.3.8</td><td>Quản lý chất lượng (ITP, nhật ký, nghiệm thu, NCR, bàn giao, sổ tay)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+              <tr style="background:#fafbff;"><td style="padding-left:28px;">II.3.9</td><td>Quản lý tài chính (IPC, VO, dòng tiền, quyết toán, bảo lãnh, chi phí CT)</td><td><span class="doc-chip warn">Cần bổ sung</span></td><td class="text-right">0%</td><td>T5/2026</td></tr>
+
+              <!-- GIAI ĐOẠN III -->
+              <tr style="background:linear-gradient(90deg,#fff7ed,#fed7aa);font-weight:800;color:#b45309;">
+                <td>III</td><td colspan="4">GIAI ĐOẠN BẢO HÀNH VÀ KẾT THÚC CÔNG TÁC BẢO HÀNH</td>
+              </tr>
+              <tr><td>III.1</td><td>ASS - Bảo hành</td><td><span class="doc-chip warn">Chưa bắt đầu</span></td><td class="text-right">0%</td><td>Sau bàn giao</td></tr>
+              <tr style="background:#fafbff;"><td>III.2</td><td>Các văn bản hành chính, pháp lý</td><td><span class="doc-chip warn">Chưa bắt đầu</span></td><td class="text-right">0%</td><td>Sau bàn giao</td></tr>
+              <tr><td>III.3</td><td>Quản lý vật tư, tài sản và CCDC</td><td><span class="doc-chip warn">Chưa bắt đầu</span></td><td class="text-right">0%</td><td>Sau bàn giao</td></tr>
+              <tr style="background:#fafbff;"><td>III.4</td><td>Thông tin các lần bảo hành</td><td><span class="doc-chip warn">Chưa bắt đầu</span></td><td class="text-right">0%</td><td>Sau bàn giao</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+      <div id="page2-document-management" class="page2-subtab-content">
+        <div class="mini-kpi-grid">
+          <article class="mini-kpi-card">
+            <div class="label">Tổng danh mục hồ sơ</div>
+            <div class="value">28</div>
+            <div class="meta">Theo cấu phần pháp lý, GPMB, XD</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Đã hoàn tất</div>
+            <div class="value">16</div>
+            <div class="meta">57% hồ sơ đã khóa</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Cần bổ sung</div>
+            <div class="value">7</div>
+            <div class="meta">Tập trung tháng tới</div>
+          </article>
+          <article class="mini-kpi-card">
+            <div class="label">Quá hạn / rủi ro</div>
+            <div class="value">3</div>
+            <div class="meta">Cần theo dõi hằng tuần</div>
+          </article>
+        </div>
+
+        <div class="doc-overview-grid">
+          <article class="doc-summary-card">
+            <h3 class="section-title">Tổng quan danh mục hồ sơ</h3>
+            <div class="doc-summary-list">
+              <div class="doc-summary-item">
+                <div>
+                  <strong>Khác</strong>
+                  <span>Hồ sơ chủ trương đầu tư, quy hoạch, môi trường, thiết kế cơ sở</span>
+                </div>
+                <div class="doc-progress-mini"><b>9/13</b><small>đã hoàn tất</small></div>
+              </div>
+              <div class="doc-summary-item">
+                <div>
+                  <strong>Khác</strong>
+                  <span>Biên bản thỏa thuận, hồ sơ đo đạc, bàn giao mặt bằng, xác nhận pháp lý đất</span>
+                </div>
+                <div class="doc-progress-mini"><b>4/6</b><small>đã hoàn tất</small></div>
+              </div>
+              <div class="doc-summary-item">
+                <div>
+                  <strong>Nhà thầu</strong>
+                  <span>Hồ sơ mời thầu, hồ sơ thiết kế kỹ thuật, nghiệm thu, hoàn công</span>
+                </div>
+                <div class="doc-progress-mini"><b>3/9</b><small>đã hoàn tất</small></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="doc-summary-card">
+            <h3 class="section-title">Trạng thái theo nhóm hồ sơ</h3>
+            <div class="doc-stage-list">
+              <div class="doc-stage-item">
+                <header><h4>Khác</h4><span class="doc-chip doing">Đang xử lý</span></header>
+                <p>QHCT 1/500, hồ sơ ĐTM và hồ sơ chấp thuận chủ trương đầu tư đang là cụm cần khóa sớm.</p>
+              </div>
+              <div class="doc-stage-item">
+                <header><h4>Khác</h4><span class="doc-chip warn">Cần bổ sung</span></header>
+                <p>Còn thiếu biên bản bàn giao khu vực III và xác nhận hoàn tất hồ sơ đất công xen kẹt.</p>
+              </div>
+              <div class="doc-stage-item">
+                <header><h4>Nhà thầu</h4><span class="doc-chip danger">Nguy cơ trễ</span></header>
+                <p>Cần chuẩn hóa hồ sơ mời thầu và danh mục bản vẽ để sẵn sàng khởi công.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Danh mục hồ sơ</th>
+                <th>Nhóm</th>
+                <th>Phụ trách</th>
+                <th>Trạng thái</th>
+                <th>Ưu tiên</th>
+                <th>Hạn hoàn tất</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Hồ sơ chấp thuận chủ trương đầu tư</td>
+                <td>Khác</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>10/04/2026</td>
+                <td>Chờ bổ sung ý kiến sở ngành</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Hồ sơ nhiệm vụ QHCT 1/500</td>
+                <td>Khác</td>
+                <td>Tư vấn quy hoạch</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>05/04/2026</td>
+                <td>Chuẩn bị trình thẩm định</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Hồ sơ quy hoạch chi tiết 1/500</td>
+                <td>Khác</td>
+                <td>Tư vấn quy hoạch</td>
+                <td><span class="doc-chip warn">Cần bổ sung</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>20/04/2026</td>
+                <td>Bổ sung phương án giao thông nội khu</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Hồ sơ ĐTM</td>
+                <td>Khác</td>
+                <td>Ban Môi trường</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td><span class="doc-priority medium">Trung bình</span></td>
+                <td>28/04/2026</td>
+                <td>Đang rà soát số liệu nền</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Biên bản bàn giao GPMB khu vực II</td>
+                <td>Khác</td>
+                <td>Ban GPMB</td>
+                <td><span class="doc-chip ok">Hoàn tất</span></td>
+                <td><span class="doc-priority low">Thấp</span></td>
+                <td>15/03/2026</td>
+                <td>Đã lưu hồ sơ bản cứng</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Biên bản bàn giao GPMB khu vực III</td>
+                <td>Khác</td>
+                <td>Ban GPMB</td>
+                <td><span class="doc-chip warn">Cần bổ sung</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>12/04/2026</td>
+                <td>Còn 2 hộ dân chưa ký nhận</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Hồ sơ pháp lý đất công xen kẹt</td>
+                <td>Khác</td>
+                <td>Ban Pháp lý + GPMB</td>
+                <td><span class="doc-chip danger">Quá hạn</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>30/03/2026</td>
+                <td>Cần xác nhận lại hiện trạng đất</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Hồ sơ mời thầu hạ tầng kỹ thuật</td>
+                <td>Nhà thầu</td>
+                <td>Ban Xây dựng</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td><span class="doc-priority high">Cao</span></td>
+                <td>18/04/2026</td>
+                <td>Đang tổng hợp BOQ và tiêu chí kỹ thuật</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>Thiết kế bản vẽ thi công hạ tầng kỹ thuật</td>
+                <td>Vật tư</td>
+                <td>Tư vấn thiết kế</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td><span class="doc-priority medium">Trung bình</span></td>
+                <td>25/04/2026</td>
+                <td>Chờ chốt cao độ san nền</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>Hồ sơ nghiệm thu nội bộ hạng mục mẫu</td>
+                <td>XD</td>
+                <td>Ban Xây dựng</td>
+                <td><span class="doc-chip warn">Cần bổ sung</span></td>
+                <td><span class="doc-priority medium">Trung bình</span></td>
+                <td>05/05/2026</td>
+                <td>Thiếu phụ lục vật liệu và bản vẽ hoàn công</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <div class="doc-note-grid">
+          <article class="doc-note-card">
+            <h3 class="section-title">Hồ sơ cần bổ sung ngay</h3>
+            <ul>
+              <li>Bổ sung đủ phụ lục cho hồ sơ quy hoạch chi tiết 1/500 trước kỳ họp thẩm định.</li>
+              <li>Chốt biên bản bàn giao GPMB khu vực III để không ảnh hưởng gói mời thầu hạ tầng.</li>
+              <li>Chuẩn hóa danh mục bản vẽ và biểu mẫu trong hồ sơ mời thầu xây dựng.</li>
+            </ul>
+          </article>
+          <article class="doc-note-card">
+            <h3 class="section-title">Kiểm soát lưu trữ hồ sơ</h3>
+            <ul>
+              <li>Mỗi hồ sơ cần có mã số, người phụ trách và vị trí lưu bản cứng/bản mềm.</li>
+              <li>Nhóm hồ sơ quá hạn cần cập nhật tiến độ tối thiểu 1 lần/tuần.</li>
+              <li>Nên bổ sung cột liên kết file scan nếu sau này mở rộng dashboard sang dữ liệu thật.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+
+      <!-- TAB 5: DUYỆT CHI DỰ ÁN -->
+      <div id="page2-budget-approval" class="page2-subtab-content">
+        <!-- KPI DUYỆT CHI -->
+        <div class="mini-kpi-grid">
+          <article class="mini-kpi-card" style="border-left: 4px solid #f59e0b;">
+            <div class="label">Chờ duyệt chi</div>
+            <div class="value" style="color:#f59e0b;">5</div>
+            <div class="meta">Tổng: 14.8 tỷ đồng</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left: 4px solid #10b981;">
+            <div class="label">Đã duyệt trong tháng</div>
+            <div class="value" style="color:#10b981;">12</div>
+            <div class="meta">Giá trị: 38.5 tỷ đồng</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left: 4px solid #ef4444;">
+            <div class="label">Từ chối / Trả lại</div>
+            <div class="value" style="color:#ef4444;">2</div>
+            <div class="meta">Cần bổ sung hồ sơ</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left: 4px solid #1f6feb;">
+            <div class="label">Tổng đã giải ngân T3/2026</div>
+            <div class="value" style="color:#1f6feb;">110 tỷ</div>
+            <div class="meta">Theo kế hoạch: 145 tỷ</div>
+          </article>
+        </div>
+
+        <!-- BẢNG DUYỆT CHI -->
+        <article class="table-wrap" style="border-color: #fde68a; background: linear-gradient(180deg, #fffef2 0%, #ffffff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">✅ Danh sách đề nghị duyệt chi</h3>
+            <span class="badge" style="background:#fef3c7;color:#b45309;">Khách sạn Nam Hưng – Marriott • T3/2026</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Nội dung chi</th>
+                <th>Khoản mục</th>
+                <th>Nhà cung cấp / Đối tác</th>
+                <th class="text-right">Số tiền (tỷ)</th>
+                <th>Ngày đề nghị</th>
+                <th>Hạn duyệt</th>
+                <th>Người đề nghị</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Thanh toán bồi thường GPMB hộ ông Nguyễn Văn A - Khu vực III</td>
+                <td>Khác</td>
+                <td>Hộ dân</td>
+                <td class="text-right">2.450</td>
+                <td>05/03/2026</td>
+                <td>12/03/2026</td>
+                <td>Ban GPMB</td>
+                <td><span class="doc-chip ok">Đã duyệt</span></td>
+                <td>Đã chuyển khoản</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Phí tư vấn lập hồ sơ Nhiệm vụ QHCT 1/500</td>
+                <td>Khác</td>
+                <td>Cty Tư vấn XYZ</td>
+                <td class="text-right">0.850</td>
+                <td>06/03/2026</td>
+                <td>13/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip ok">Đã duyệt</span></td>
+                <td>Thanh toán đợt 1/2</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Chi phí đo đạc trích đo địa chính phân khu B</td>
+                <td>Khác</td>
+                <td>Công ty Đo đạc ABC</td>
+                <td class="text-right">0.320</td>
+                <td>08/03/2026</td>
+                <td>15/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip ok">Đã duyệt</span></td>
+                <td>Hoàn tất nghiệm thu</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Phí cắm mốc ranh giới dự án theo QĐ phê duyệt</td>
+                <td>Khác</td>
+                <td>Sở TNMT tỉnh</td>
+                <td class="text-right">0.180</td>
+                <td>10/03/2026</td>
+                <td>17/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip ok">Đã duyệt</span></td>
+                <td>Nộp ngân sách nhà nước</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Thanh toán hợp đồng tư vấn lập ĐTM sơ bộ</td>
+                <td>Khác</td>
+                <td>Cty Môi trường DEF</td>
+                <td class="text-right">1.200</td>
+                <td>12/03/2026</td>
+                <td>19/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip ok">Đã duyệt</span></td>
+                <td>Đang thực hiện báo cáo</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Chi phí lập hồ sơ thiết kế ý tưởng quy hoạch</td>
+                <td>Nhà thầu</td>
+                <td>Cty Kiến trúc GHI</td>
+                <td class="text-right">2.800</td>
+                <td>14/03/2026</td>
+                <td>21/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td>Chờ phê duyệt BGĐ</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Thanh toán bồi thường GPMB hộ bà Trần Thị B</td>
+                <td>Khác</td>
+                <td>Hộ dân</td>
+                <td class="text-right">1.850</td>
+                <td>15/03/2026</td>
+                <td>22/03/2026</td>
+                <td>Ban GPMB</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td>Chờ xác nhận hiện trạng</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Ký quỹ bổ sung giai đoạn 2 theo tiến độ thủ tục</td>
+                <td>Khác</td>
+                <td>Kho bạc Nhà nước</td>
+                <td class="text-right">3.000</td>
+                <td>16/03/2026</td>
+                <td>23/03/2026</td>
+                <td>Kế toán dự án</td>
+                <td><span class="doc-chip warn">Cần bổ sung</span></td>
+                <td>Thiếu biên bản xác nhận tiến độ</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>Chi phí điều phối hậu cần tháng 3/2026</td>
+                <td>Khác</td>
+                <td>Nội bộ</td>
+                <td class="text-right">0.450</td>
+                <td>17/03/2026</td>
+                <td>24/03/2026</td>
+                <td>Ban Điều hành DA</td>
+                <td><span class="doc-chip warn">Cần bổ sung</span></td>
+                <td>Bổ sung bảng kê chi tiết</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>Tạm ứng chi phí khảo sát địa chất phân khu C</td>
+                <td>Vật tư</td>
+                <td>Cty Khảo sát JKL</td>
+                <td class="text-right">1.700</td>
+                <td>17/03/2026</td>
+                <td>25/03/2026</td>
+                <td>Ban Xây dựng</td>
+                <td><span class="doc-chip doing">Đang xử lý</span></td>
+                <td>Đang thẩm định hợp đồng</td>
+              </tr>
+              <tr class="hotspot">
+                <td>11</td>
+                <td>Thanh toán bồi thường tranh chấp đất xen kẹt - Hộ ông C</td>
+                <td>Khác</td>
+                <td>Hộ dân</td>
+                <td class="text-right">4.200</td>
+                <td>10/03/2026</td>
+                <td>17/03/2026</td>
+                <td>Ban GPMB</td>
+                <td><span class="doc-chip danger">Từ chối</span></td>
+                <td>Chưa có cơ sở pháp lý, trả hồ sơ</td>
+              </tr>
+              <tr class="hotspot">
+                <td>12</td>
+                <td>Chi phí tư vấn bổ sung ngoài hợp đồng</td>
+                <td>Khác</td>
+                <td>Cty Tư vấn XYZ</td>
+                <td class="text-right">0.650</td>
+                <td>12/03/2026</td>
+                <td>19/03/2026</td>
+                <td>Ban Pháp lý</td>
+                <td><span class="doc-chip danger">Từ chối</span></td>
+                <td>Không có trong dự toán được duyệt</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <!-- GHI CHÚ DUYỆT CHI -->
+        <div class="doc-note-grid" style="margin-top: 12px;">
+          <article class="doc-note-card">
+            <h3 class="section-title">📌 Quy trình duyệt chi</h3>
+            <ul>
+              <li>Đề nghị duyệt chi cần có: hợp đồng/biên bản xác nhận, hóa đơn/phiếu đề nghị, nghiệm thu nội bộ.</li>
+              <li>Các khoản từ 1 tỷ trở lên: cần Ban Giám đốc phê duyệt trực tiếp.</li>
+              <li>Hạn duyệt tối đa: 7 ngày làm việc kể từ ngày đề nghị.</li>
+              <li>Ký quỹ và GPMB: cần có xác nhận pháp lý đi kèm trước khi giải ngân.</li>
+            </ul>
+          </article>
+          <article class="doc-note-card">
+            <h3 class="section-title">⚠️ Lưu ý tháng tới</h3>
+            <ul>
+              <li>Ưu tiên giải quyết 5 đề nghị đang chờ duyệt trước 25/03/2026.</li>
+              <li>Các khoản bị từ chối cần bổ sung đầy đủ cơ sở pháp lý và dự toán trước khi trình lại.</li>
+              <li>Chuẩn bị ngân sách giải ngân T4/2026: ước tính 150-160 tỷ theo kế hoạch.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+
+    </section>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div id="page3" class="tab-content">
+    <!-- BỘ LỌC TRANG 3 -->
+    <div class="filter-bar">
+      <span class="filter-icon">🔍</span>
+      
+      <div class="filter-group">
+        <label for="filterYear3">Năm:</label>
+        <select id="filterYear3">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterMonth3">Tháng:</label>
+        <select id="filterMonth3">
+          <option value="all">Tất cả</option>
+          <option value="1">Tháng 1</option>
+          <option value="2">Tháng 2</option>
+          <option value="3" selected>Tháng 3</option>
+          <option value="4">Tháng 4</option>
+          <option value="5">Tháng 5</option>
+          <option value="6">Tháng 6</option>
+          <option value="7">Tháng 7</option>
+          <option value="8">Tháng 8</option>
+          <option value="9">Tháng 9</option>
+          <option value="10">Tháng 10</option>
+          <option value="11">Tháng 11</option>
+          <option value="12">Tháng 12</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterProject3">Phạm vi:</label>
+        <select id="filterProject3">
+          <option value="all" selected>Tất cả dự án</option>
+          <option value="key">Dự án trọng điểm</option>
+          <option value="urban">Nhóm đô thị - nhà ở</option>
+          <option value="industrial">Nhóm công nghiệp - hạ tầng</option>
+        </select>
+      </div>
+
+      <button class="btn-apply" onclick="applyFiltersPage3()">✔ Áp dụng</button>
+      <button class="btn-reset" onclick="resetFiltersPage3()">↻ Đặt lại</button>
+    </div>
+
+    <section class="page">
+    <section class="page">
+      <h2 class="page-title">QUẢN LÝ DỰ ÁN <span class="badge">Tổng hợp toàn bộ dự án</span></h2>
+
+      <!-- SUBTABS PAGE 3 -->
+      <div class="page2-subtabs">
+        <button class="page2-subtab-btn active" id="p3tab1btn" onclick="openP3Subtab(event,'p3-chi-phi')">📊 Chi phí &amp; Tiến độ</button>
+        <button class="page2-subtab-btn" id="p3tab2btn" onclick="openP3Subtab(event,'p3-co-cau')">📋 Cơ cấu &amp; Gantt</button>
+      </div>
+
+      <!-- SUBTAB 1: CHI PHÍ & TIẾN ĐỘ -->
+      <div id="p3-chi-phi" class="page2-subtab-content active">
+
+        <!-- KPI CHI PHÍ -->
+        <h3 class="section-title" style="margin:12px 0 10px;">💰 Theo dõi chi phí dự án</h3>
+        <div class="mini-kpi-grid" style="grid-template-columns:repeat(4,minmax(180px,1fr));margin-bottom:14px;">
+          <article class="mini-kpi-card" style="border-left:4px solid #1f6feb;">
+            <div class="label">Tổng chi phí thực tế</div>
+            <div class="value" style="color:#1f6feb;">1,307 tỷ</div>
+            <div class="meta">Toàn bộ các dự án 6 tháng đầu năm</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #f59e0b;">
+            <div class="label">Tiền dự chi (còn lại)</div>
+            <div class="value" style="color:#f59e0b;">1,963 tỷ</div>
+            <div class="meta">Ước tính 6 tháng còn lại của năm</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #ef4444;">
+            <div class="label">Mua hàng trễ hạn</div>
+            <div class="value" style="color:#ef4444;">3 gói</div>
+            <div class="meta">Cần theo dõi &amp; xử lý ngay</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #10b981;">
+            <div class="label">Mua hàng đúng tiến độ</div>
+            <div class="value" style="color:#10b981;">14 gói</div>
+            <div class="meta">Tỷ lệ đúng hạn: 82.4%</div>
+          </article>
+        </div>
+
+        <!-- BẢNG THEO DÕI CHI PHÍ -->
+        <article class="table-wrap" style="margin-bottom:14px;border-color:#fca5a5;background:linear-gradient(180deg,#fff5f5 0%,#fff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">📦 Tình trạng chi phí &amp; mua hàng theo dự án</h3>
+            <span class="badge" style="background:#fee2e2;color:#b91c1c;">Đơn vị: tỷ đồng</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th><th>Dự án</th>
+                <th class="text-right">Ngân sách</th>
+                <th class="text-right">Chi thực tế</th>
+                <th class="text-right">Còn lại</th>
+                <th class="text-right">Tiền dự chi</th>
+                <th class="text-right">% Giải ngân</th>
+                <th>Tình trạng mua hàng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Khách sạn Nam Hưng – Marriott</td><td class="text-right">850</td><td class="text-right">675.1</td><td class="text-right">174.9</td><td class="text-right">180</td><td class="text-right">79.4%</td><td><span class="status st-doing">Đúng tiến độ</span></td></tr>
+              <tr><td>2</td><td>Văn phòng Akyn</td><td class="text-right">420</td><td class="text-right">37.3</td><td class="text-right">382.7</td><td class="text-right">40</td><td class="text-right">8.9%</td><td><span class="status st-doing">Đúng tiến độ</span></td></tr>
+              <tr><td>3</td><td>The One Central Sale Gallery</td><td class="text-right">1,200</td><td class="text-right">54.1</td><td class="text-right">1,145.9</td><td class="text-right">220</td><td class="text-right">4.5%</td><td><span class="status st-doing">Đúng tiến độ</span></td></tr>
+              <tr><td>4</td><td>Sale Gallery Ocean Park 3</td><td class="text-right">650</td><td class="text-right">173.3</td><td class="text-right">476.7</td><td class="text-right">195</td><td class="text-right">26.7%</td><td><span class="status st-doing">Đúng tiến độ</span></td></tr>
+              <tr><td>5</td><td>Ginza Sushi Ichi Hà Nội</td><td class="text-right">520</td><td class="text-right">122.5</td><td class="text-right">397.5</td><td class="text-right">160</td><td class="text-right">23.6%</td><td><span class="status st-doing">Đúng tiến độ</span></td></tr>
+              <tr class="hotspot-warning"><td>6</td><td>JW Marriott Hotel & Suites Saigon</td><td class="text-right">980</td><td class="text-right">244.8</td><td class="text-right">735.2</td><td class="text-right">380</td><td class="text-right">25.0%</td><td><span class="status st-warning">Trễ 1 gói thầu</span></td></tr>
+              <tr class="hotspot"><td>7</td><td>Grand Marina Saigon</td><td class="text-right">280</td><td class="text-right">315</td><td class="text-right"><span class="pct-over">-35 tỷ</span></td><td class="text-right">0</td><td class="text-right"><span class="pct-over">112.5%</span></td><td><span class="status st-danger">Vượt ngân sách</span></td></tr>
+              <tr class="hotspot"><td>8</td><td>Khách sạn Sheraton Sài Gòn Grand Opera</td><td class="text-right">350</td><td class="text-right">228</td><td class="text-right">122</td><td class="text-right">140</td><td class="text-right">65.1%</td><td><span class="status st-danger">Trễ 2 gói thầu</span></td></tr>
+              <tr class="row-highlight-summary"><td></td><td><strong>Tổng cộng</strong></td><td class="text-right"><strong>5,250</strong></td><td class="text-right"><strong>1,850.1</strong></td><td class="text-right"><strong>3,399.9</strong></td><td class="text-right"><strong>1,315</strong></td><td class="text-right"><strong>35.2%</strong></td><td></td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <!-- KPI TIẾN ĐỘ -->
+        <h3 class="section-title" style="margin:16px 0 10px;">📋 Tiến độ toàn bộ các dự án (công việc)</h3>
+        <div class="mini-kpi-grid" style="grid-template-columns:repeat(4,minmax(180px,1fr));margin-bottom:14px;">
+          <article class="mini-kpi-card" style="border-left:4px solid #10b981;">
+            <div class="label">Tổng số công việc</div>
+            <div class="value" style="color:#10b981;">432</div>
+            <div class="meta">Toàn bộ các dự án</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #1f6feb;">
+            <div class="label">Hoàn thành</div>
+            <div class="value" style="color:#1f6feb;">280</div>
+            <div class="meta">64.8% tổng số việc</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #f59e0b;">
+            <div class="label">Đang thực hiện</div>
+            <div class="value" style="color:#f59e0b;">116</div>
+            <div class="meta">26.9% cần bám sát</div>
+          </article>
+          <article class="mini-kpi-card" style="border-left:4px solid #ef4444;">
+            <div class="label">Chưa bắt đầu / Trễ</div>
+            <div class="value" style="color:#ef4444;">36</div>
+            <div class="meta">8.3% cần xử lý khẩn</div>
+          </article>
+        </div>
+
+        <article class="table-wrap" style="border-color:#a5b4fc;background:linear-gradient(180deg,#f8f7ff 0%,#fff 100%);">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">📊 Tiến độ công việc theo dự án</h3>
+            <span class="badge" style="background:#ede9fe;color:#5b21b6;">Cập nhật T3/2026</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th><th>Dự án</th>
+                <th class="text-right">Tổng việc</th>
+                <th class="text-right">Hoàn thành</th>
+                <th class="text-right">Đang làm</th>
+                <th class="text-right">Chưa làm/Trễ</th>
+                <th class="text-right">% Tiến độ</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Khách sạn Nam Hưng – Marriott</td><td class="text-right">50</td><td class="text-right">34</td><td class="text-right">11</td><td class="text-right">5</td><td class="text-right">68%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr><td>2</td><td>Văn phòng Akyn</td><td class="text-right">60</td><td class="text-right">47</td><td class="text-right">10</td><td class="text-right">3</td><td class="text-right">79%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr class="hotspot"><td>3</td><td>The One Central Sale Gallery</td><td class="text-right">43</td><td class="text-right">18</td><td class="text-right">14</td><td class="text-right">11</td><td class="text-right"><span class="pct-danger">42%</span></td><td><span class="status st-danger">Chậm tiến độ</span></td></tr>
+              <tr><td>4</td><td>Sale Gallery Ocean Park 3</td><td class="text-right">41</td><td class="text-right">29</td><td class="text-right">9</td><td class="text-right">3</td><td class="text-right">71%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr><td>5</td><td>Ginza Sushi Ichi Hà Nội</td><td class="text-right">42</td><td class="text-right">36</td><td class="text-right">5</td><td class="text-right">1</td><td class="text-right">86%</td><td><span class="status st-done">Gần hoàn thành</span></td></tr>
+              <tr class="hotspot"><td>6</td><td>JW Marriott Hotel & Suites Saigon</td><td class="text-right">40</td><td class="text-right">14</td><td class="text-right">16</td><td class="text-right">10</td><td class="text-right"><span class="pct-danger">35%</span></td><td><span class="status st-danger">Chậm tiến độ</span></td></tr>
+              <tr><td>7</td><td>Grand Marina Saigon</td><td class="text-right">35</td><td class="text-right">31</td><td class="text-right">4</td><td class="text-right">0</td><td class="text-right">88%</td><td><span class="status st-done">Gần hoàn thành</span></td></tr>
+              <tr><td>8</td><td>Khách sạn Sheraton Sài Gòn Grand Opera</td><td class="text-right">38</td><td class="text-right">22</td><td class="text-right">12</td><td class="text-right">4</td><td class="text-right">58%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr><td>9</td><td>DỰ ÁN I</td><td class="text-right">22</td><td class="text-right">22</td><td class="text-right">0</td><td class="text-right">0</td><td class="text-right">100%</td><td><span class="status st-done">Hoàn thành</span></td></tr>
+              <tr><td>10</td><td>DỰ ÁN J</td><td class="text-right">30</td><td class="text-right">16</td><td class="text-right">11</td><td class="text-right">3</td><td class="text-right">52%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr><td>11</td><td>DỰ ÁN K</td><td class="text-right">31</td><td class="text-right">25</td><td class="text-right">6</td><td class="text-right">0</td><td class="text-right">82%</td><td><span class="status st-doing">Đang triển khai</span></td></tr>
+              <tr class="row-highlight-summary"><td></td><td><strong>Tổng / Bình quân</strong></td><td class="text-right"><strong>432</strong></td><td class="text-right"><strong>280</strong></td><td class="text-right"><strong>116</strong></td><td class="text-right"><strong>36</strong></td><td class="text-right"><strong>64.8%</strong></td><td></td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div><!-- end p3-chi-phi -->
+
+      <!-- SUBTAB 2: CƠ CẤU & GANTT -->
+      <div id="p3-co-cau" class="page2-subtab-content">
+        <article class="table-wrap table-theme-cost-structure" style="margin-bottom:14px;">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">1. Cơ cấu chi phí các dự án theo nhóm</h3>
+            <span class="badge">Đơn vị: tỷ đồng</span>
+          </div>
+          <table class="table-compare-projects">
+            <thead>
+              <tr>
+                <th>STT</th><th class="project-col-wide">Dự án</th>
+                <th class="text-right">Tổng cộng</th>
+                <th class="text-right">Vật tư</th>
+                <th class="text-right">Nhà thầu</th>
+                <th class="text-right">Khác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-highlight-total"><td></td><td>Tổng cộng</td><td class="text-right">1,307.1</td><td class="text-right">621.4</td><td class="text-right">548.3</td><td class="text-right">137.4</td></tr>
+              <tr><td>1</td><td>Khách sạn Nam Hưng – Marriott</td><td class="text-right">675.1</td><td class="text-right">312.5</td><td class="text-right">298.7</td><td class="text-right">63.9</td></tr>
+              <tr><td>2</td><td>Văn phòng Akyn</td><td class="text-right">37.3</td><td class="text-right">18.2</td><td class="text-right">14.6</td><td class="text-right">4.5</td></tr>
+              <tr><td>3</td><td>The One Central Sale Gallery</td><td class="text-right">54.1</td><td class="text-right">26.8</td><td class="text-right">20.3</td><td class="text-right">7.0</td></tr>
+              <tr><td>4</td><td>Sale Gallery Ocean Park 3</td><td class="text-right">173.3</td><td class="text-right">84.6</td><td class="text-right">73.5</td><td class="text-right">15.2</td></tr>
+              <tr><td>5</td><td>Ginza Sushi Ichi Hà Nội</td><td class="text-right">122.5</td><td class="text-right">96.3</td><td class="text-right">21.4</td><td class="text-right">4.8</td></tr>
+              <tr><td>6</td><td>JW Marriott Hotel & Suites Saigon</td><td class="text-right">244.8</td><td class="text-right">83.0</td><td class="text-right">119.8</td><td class="text-right">42.0</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="table-wrap table-theme-monthly" style="margin-bottom:14px;">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">2. Chi phí theo các tháng</h3>
+            <span class="badge">Đơn vị: tỷ đồng</span>
+          </div>
+          <table class="table-compare-projects">
+            <thead>
+              <tr>
+                <th>STT</th><th class="project-col-wide">Dự án</th>
+                <th class="text-right">T1/2026</th><th class="text-right">T2/2026</th><th class="text-right">T3/2026</th>
+                <th class="text-right">T4/2026</th><th class="text-right">T5/2026</th><th class="text-right">T6/2026</th>
+                <th class="text-right">Tổng 6 tháng</th><th class="text-right">Bình quân/tháng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="monthly-row-gpmb"><td>1</td><td class="metric-label-cell">Khách sạn Nam Hưng – Marriott</td><td class="text-right">92.0</td><td class="text-right">110.0</td><td class="text-right">105.0</td><td class="text-right">118.0</td><td class="text-right">126.0</td><td class="text-right">124.1</td><td class="text-right">675.1</td><td class="text-right">112.5</td></tr>
+              <tr class="monthly-row-phaply"><td>2</td><td class="metric-label-cell">Văn phòng Akyn</td><td class="text-right">5.1</td><td class="text-right">6.4</td><td class="text-right">4.9</td><td class="text-right">7.2</td><td class="text-right">6.0</td><td class="text-right">7.7</td><td class="text-right">37.3</td><td class="text-right">6.2</td></tr>
+              <tr class="monthly-row-xaydung"><td>3</td><td class="metric-label-cell">The One Central Sale Gallery</td><td class="text-right">7.0</td><td class="text-right">8.2</td><td class="text-right">9.6</td><td class="text-right">10.4</td><td class="text-right">9.1</td><td class="text-right">9.8</td><td class="text-right">54.1</td><td class="text-right">9.0</td></tr>
+              <tr class="monthly-row-kyquy"><td>4</td><td class="metric-label-cell">Sale Gallery Ocean Park 3</td><td class="text-right">22.5</td><td class="text-right">28.0</td><td class="text-right">31.4</td><td class="text-right">29.6</td><td class="text-right">30.2</td><td class="text-right">31.6</td><td class="text-right">173.3</td><td class="text-right">28.9</td></tr>
+              <tr class="monthly-row-hoso"><td>5</td><td class="metric-label-cell">Ginza Sushi Ichi Hà Nội</td><td class="text-right">16.8</td><td class="text-right">19.2</td><td class="text-right">21.3</td><td class="text-right">20.5</td><td class="text-right">22.4</td><td class="text-right">22.3</td><td class="text-right">122.5</td><td class="text-right">20.4</td></tr>
+              <tr class="monthly-row-khac"><td>6</td><td class="metric-label-cell">JW Marriott Hotel & Suites Saigon</td><td class="text-right">35.0</td><td class="text-right">37.4</td><td class="text-right">39.1</td><td class="text-right">42.5</td><td class="text-right">45.8</td><td class="text-right">45.0</td><td class="text-right">244.8</td><td class="text-right">40.8</td></tr>
+              <tr class="monthly-row-tong row-highlight-summary"><td></td><td class="metric-label-cell">Tổng tháng</td><td class="text-right">178.4</td><td class="text-right">209.2</td><td class="text-right">211.3</td><td class="text-right">228.2</td><td class="text-right">239.5</td><td class="text-right">240.5</td><td class="text-right">1,307.1</td><td class="text-right">217.9</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="table-wrap table-theme-stage" style="margin-bottom:14px;">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">3. So sánh 3 nhóm chi phí của tất cả dự án</h3>
+            <span class="badge">KH / TT / % hoàn thành</span>
+          </div>
+          <table class="table-compare-projects">
+            <thead>
+              <tr>
+                <th rowspan="2">STT</th><th rowspan="2" class="project-col-wide">Dự án</th>
+                <th colspan="3" class="stage-group-gpmb" style="text-align:center;">Vật tư</th>
+                <th colspan="3" class="stage-group-legal" style="text-align:center;">Nhà thầu</th>
+                <th colspan="3" class="stage-group-build" style="text-align:center;">Khác</th>
+              </tr>
+              <tr>
+                <th class="text-right">KH</th><th class="text-right">TT</th><th class="text-right">%</th>
+                <th class="text-right">KH</th><th class="text-right">TT</th><th class="text-right">%</th>
+                <th class="text-right">KH</th><th class="text-right">TT</th><th class="text-right">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Khách sạn Nam Hưng – Marriott</td><td class="text-right">380</td><td class="text-right">312.5</td><td class="text-right">82.2%</td><td class="text-right">350</td><td class="text-right">298.7</td><td class="text-right">85.3%</td><td class="text-right">120</td><td class="text-right">63.9</td><td class="text-right">53.3%</td></tr>
+              <tr><td>2</td><td>Văn phòng Akyn</td><td class="text-right">22</td><td class="text-right">18.2</td><td class="text-right">82.7%</td><td class="text-right">18</td><td class="text-right">14.6</td><td class="text-right">81.1%</td><td class="text-right">8</td><td class="text-right">4.5</td><td class="text-right">56.3%</td></tr>
+              <tr><td>3</td><td>The One Central Sale Gallery</td><td class="text-right">32</td><td class="text-right">26.8</td><td class="text-right">83.8%</td><td class="text-right">24</td><td class="text-right">20.3</td><td class="text-right">84.6%</td><td class="text-right">10</td><td class="text-right">7.0</td><td class="text-right">70.0%</td></tr>
+              <tr><td>4</td><td>Sale Gallery Ocean Park 3</td><td class="text-right">100</td><td class="text-right">84.6</td><td class="text-right">84.6%</td><td class="text-right">88</td><td class="text-right">73.5</td><td class="text-right">83.5%</td><td class="text-right">22</td><td class="text-right">15.2</td><td class="text-right">69.1%</td></tr>
+              <tr><td>5</td><td>Ginza Sushi Ichi Hà Nội</td><td class="text-right">110</td><td class="text-right">96.3</td><td class="text-right">87.5%</td><td class="text-right">26</td><td class="text-right">21.4</td><td class="text-right">82.3%</td><td class="text-right">8</td><td class="text-right">4.8</td><td class="text-right">60.0%</td></tr>
+              <tr><td>6</td><td>JW Marriott Hotel & Suites Saigon</td><td class="text-right">98</td><td class="text-right">83.0</td><td class="text-right">84.7%</td><td class="text-right">140</td><td class="text-right">119.8</td><td class="text-right">85.6%</td><td class="text-right">55</td><td class="text-right">42.0</td><td class="text-right">76.4%</td></tr>
+              <tr class="row-highlight-summary"><td></td><td>Tổng / Bình quân</td><td class="text-right">742</td><td class="text-right">621.4</td><td class="text-right">83.7%</td><td class="text-right">646</td><td class="text-right">548.3</td><td class="text-right">84.9%</td><td class="text-right">223</td><td class="text-right">137.4</td><td class="text-right">61.6%</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="table-wrap table-theme-gantt">
+          <div class="table-header-band">
+            <h3 class="section-title" style="margin:0;">4. Gantt chart toàn bộ dự án theo 3 giai đoạn</h3>
+            <span class="badge">Tiến độ 12 tháng năm 2026</span>
+          </div>
+          <div class="gantt-legend">
+            <span><i class="gantt-dot" style="background:#3b82f6"></i>I. Đấu thầu</span>
+            <span><i class="gantt-dot" style="background:#10b981"></i>II. Triển khai</span>
+            <span><i class="gantt-dot" style="background:#f59e0b"></i>III. Bảo hành</span>
+            <span><i class="gantt-dot doing"></i>Đang làm</span>
+            <span><i class="gantt-dot todo"></i>Chưa làm</span>
+          </div>
+          <div class="gantt-wrap">
+            <div class="gantt-grid">
+              <div class="gantt-cell gantt-head">Dự án</div>
+              <div class="gantt-cell gantt-head">T1</div><div class="gantt-cell gantt-head">T2</div><div class="gantt-cell gantt-head">T3</div><div class="gantt-cell gantt-head">T4</div><div class="gantt-cell gantt-head">T5</div><div class="gantt-cell gantt-head">T6</div><div class="gantt-cell gantt-head">T7</div><div class="gantt-cell gantt-head">T8</div><div class="gantt-cell gantt-head">T9</div><div class="gantt-cell gantt-head">T10</div><div class="gantt-cell gantt-head">T11</div><div class="gantt-cell gantt-head">T12</div>
+
+              <!-- Khách sạn Nam Hưng – Marriott: Đấu thầu T1-T3 ✓ | Triển khai T4-T10 đang | Bảo hành T11-T12 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">Khách sạn Nam Hưng – Marriott</div><div class="gantt-project-meta"><span>68% hoàn thành</span><span>34/50 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:68%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+
+              <!-- Văn phòng Akyn: Đấu thầu T1-T2 ✓ | Triển khai T3-T9 đang | Bảo hành T10-T11 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">Văn phòng Akyn</div><div class="gantt-project-meta"><span>79% hoàn thành</span><span>47/60 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:79%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot empty">—</div>
+
+              <!-- The One Central Sale Gallery: Đấu thầu T1-T3 ✓ | Triển khai T4-T10 đang/todo | Bảo hành T11-T12 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">The One Central Sale Gallery</div><div class="gantt-project-meta"><span>42% hoàn thành</span><span>18/43 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:42%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+
+              <!-- Sale Gallery Ocean Park 3: Đấu thầu T1-T2 ✓ | Triển khai T3-T9 ✓/đang | Bảo hành T10-T11 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">Sale Gallery Ocean Park 3</div><div class="gantt-project-meta"><span>71% hoàn thành</span><span>29/41 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:71%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot empty">—</div>
+
+              <!-- Ginza Sushi Ichi Hà Nội: Đấu thầu T1 ✓ | Triển khai T2-T8 ✓/đang | Bảo hành T9-T10 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">Ginza Sushi Ichi Hà Nội</div><div class="gantt-project-meta"><span>86% hoàn thành</span><span>36/42 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:86%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-build">✓ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+              <div class="gantt-cell gantt-slot empty">—</div>
+              <div class="gantt-cell gantt-slot empty">—</div>
+
+              <!-- JW Marriott Hotel & Suites Saigon: Đấu thầu T1-T3 đang | Triển khai T4-T11 todo | Bảo hành T12 todo -->
+              <div class="gantt-cell gantt-project"><div class="gantt-project-card"><div class="gantt-project-name">JW Marriott Hotel & Suites Saigon</div><div class="gantt-project-meta"><span>35% hoàn thành</span><span>14/40 đầu việc</span></div><div class="gantt-overall-track"><div class="gantt-overall-fill" style="width:35%"></div></div></div></div>
+              <div class="gantt-cell gantt-slot done"><span class="gantt-state-pill phase-legal">✓ I</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-legal">◔ I</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-legal">◔ I</span></div>
+              <div class="gantt-cell gantt-slot doing"><span class="gantt-state-pill phase-build">◔ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill">○ II</span></div>
+              <div class="gantt-cell gantt-slot todo"><span class="gantt-state-pill phase-gpmb">○ III</span></div>
+            </div>
+          </div>
+        </article>
+      </div><!-- end p3-co-cau -->
+
+    </section>
+    </div><!-- end page3 -->
+  </div><!-- end container -->
+
+  <script>
+    // =================== UTILITIES ===================
+    const commonGrid = { color: '#e8edf6' };
+
+    function openTab(evt, tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+      if (tabId === 'page2') initPage2Charts();
+      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 80);
+    }
+
+    function openPage2Subtab(evt, tabId) {
+      document.querySelectorAll('#page2 .page2-subtab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#page2 .page2-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 80);
+    }
+
+    function openP3Subtab(evt, tabId) {
+      document.querySelectorAll('#page3 .page2-subtab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#page3 .page2-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+
+    function toggleNextMonthPlan() {
+      const panel = document.getElementById('nextMonthPlanPanel');
+      const button = document.getElementById('nextMonthPlanBtn');
+      if (!panel || !button) return;
+      const isHidden = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', !isHidden);
+      button.classList.toggle('active', isHidden);
+      button.textContent = isHidden ? 'Ẩn kế hoạch tháng tới' : 'Kế hoạch tháng tới';
+    }
+
+    // =================== FILTERS ===================
+    function applyFilters() {
+      const year = document.getElementById('filterYear').value;
+      const month = document.getElementById('filterMonth').value;
+      const quarter = document.getElementById('filterQuarter').value;
+      let info = 'Kỳ báo cáo: ';
+      info += month !== 'all' ? 'T'+month+'/'+year : (quarter !== 'all' ? quarter+'/'+year : 'Năm '+year);
+      info += ' • Cập nhật: 17/03/2026';
+      document.querySelector('.meta').textContent = info;
+    }
+    function resetFilters() {
+      document.getElementById('filterYear').value = '2026';
+      document.getElementById('filterMonth').value = '3';
+      document.getElementById('filterQuarter').value = 'Q1';
+      document.getElementById('filterCompany').value = 'all';
+      document.getElementById('filterStatus').value = 'all';
+      document.querySelector('.meta').textContent = 'Kỳ báo cáo: Q1/2026 • Cập nhật: 17/03/2026';
+    }
+    function applyFiltersPage2() {
+      const year = document.getElementById('filterYear2').value;
+      const month = document.getElementById('filterMonth2').value;
+      const project = document.getElementById('filterProject');
+      alert('Đã áp dụng bộ lọc:\n- Năm: '+year+'\n- Tháng: '+(month==='all'?'Tất cả':'T'+month)+'\n- Dự án: '+project.options[project.selectedIndex].text);
+    }
+    function resetFiltersPage2() {
+      document.getElementById('filterYear2').value = '2026';
+      document.getElementById('filterMonth2').value = '3';
+      document.getElementById('filterProject').value = 'ninhthuy';
+    }
+    function applyFiltersPage3() {
+      const year = document.getElementById('filterYear3').value;
+      const month = document.getElementById('filterMonth3').value;
+      const scope = document.getElementById('filterProject3');
+      alert('Đã áp dụng bộ lọc:\n- Năm: '+year+'\n- Tháng: '+(month==='all'?'Tất cả':'T'+month)+'\n- Phạm vi: '+scope.options[scope.selectedIndex].text);
+    }
+    function resetFiltersPage3() {
+      document.getElementById('filterYear3').value = '2026';
+      document.getElementById('filterMonth3').value = '3';
+      document.getElementById('filterProject3').value = 'all';
+    }
+
+    document.getElementById('filterMonth').addEventListener('change', function() {
+      const m = parseInt(this.value);
+      const q = document.getElementById('filterQuarter');
+      if (m>=1&&m<=3) q.value='Q1';
+      else if (m>=4&&m<=6) q.value='Q2';
+      else if (m>=7&&m<=9) q.value='Q3';
+      else if (m>=10&&m<=12) q.value='Q4';
+      else q.value='all';
+    });
+
+    // =================== PAGE 1 CHARTS (always visible) ===================
+    const monthlyPlan   = [120,135,145,150,155,155];
+    const monthlyActual = [92,101,110,98,104,0];
+    const monthlyPct    = monthlyPlan.map((p,i)=>p>0?Math.round(monthlyActual[i]/p*100):0);
+    const cumPlan   = monthlyPlan.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+    const cumActual = monthlyActual.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+    const cumPct    = cumPlan.map((p,i)=>p>0?Math.round(cumActual[i]/p*100):0);
+
+    const disbChart = new Chart(document.getElementById('disbursementPlanActual'),{
+      type:'bar',
+      data:{
+        labels:['T1','T2','T3','T4','T5','T6'],
+        datasets:[
+          {label:'Kế hoạch (tỷ)',data:[...monthlyPlan],backgroundColor:'#8bb7ff',order:2},
+          {label:'Thực tế (tỷ)',data:[...monthlyActual],backgroundColor:'#1f6feb',order:2},
+          {label:'% Hoàn thành',data:[...monthlyPct],type:'line',borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.1)',borderWidth:3,pointRadius:5,pointBackgroundColor:'#d93025',tension:.3,yAxisID:'yPct',order:1}
+        ]
+      },
+      options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:commonGrid,title:{display:true,text:'Tỷ đồng',font:{size:11}}},yPct:{position:'right',beginAtZero:true,max:120,grid:{display:false},title:{display:true,text:'%',font:{size:11}},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}}}
+    });
+
+    window.toggleDisbursementView = function(view) {
+      const btns = document.querySelectorAll('.toggle-btns .toggle-btn');
+      btns.forEach(b=>b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      if(view==='monthly'){
+        disbChart.data.datasets[0].data=[...monthlyPlan];
+        disbChart.data.datasets[1].data=[...monthlyActual];
+        disbChart.data.datasets[2].data=[...monthlyPct];
+      } else {
+        disbChart.data.datasets[0].data=[...cumPlan];
+        disbChart.data.datasets[1].data=[...cumActual];
+        disbChart.data.datasets[2].data=[...cumPct];
+      }
+      disbChart.update();
+    };
+
+    const budgets = [850,420,1200,650,520,980,280,350,180,450,120];
+    const avgBudget = Math.round(budgets.reduce((a,b)=>a+b,0)/budgets.length);
+    new Chart(document.getElementById('subsidiaryProgress'),{
+      type:'bar',
+      data:{
+        labels:['Nam Hưng – Marriott','Akyn','The One Central','Ocean Park 3','Ginza Sushi Ichi','JW Marriott Saigon','Grand Marina','Sheraton Sài Gòn','Dự án I','Dự án J','Dự án K'],
+        datasets:[
+          {label:'Bình quân ('+avgBudget+' tỷ)',data:Array(budgets.length).fill(avgBudget),type:'line',borderColor:'#1f6feb',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false,order:0,datalabels:{display:false}},
+          {label:'Ngân sách (tỷ)',data:budgets,backgroundColor:budgets.map(v=>v>=avgBudget?'#1f6feb':v>=300?'#f0c24b':'#64b5f6'),borderRadius:4,order:1,datalabels:{display:true,anchor:'end',align:'end',color:'#1f2a44',font:{weight:'bold',size:11},formatter:v=>v+' tỷ'}}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{indexAxis:'y',maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:commonGrid,title:{display:true,text:'Tỷ đồng'},ticks:{callback:v=>v+' tỷ'}},y:{grid:{display:false}}},plugins:{legend:{position:'bottom'},datalabels:{display:true}}}
+    });
+
+    // =================== PAGE 2 CHARTS (lazy) ===================
+    let p2inited = false;
+    function initPage2Charts() {
+      if (p2inited) return;
+      p2inited = true;
+
+      // Revenue-Cost-Profit
+      const rcpM = {labels:['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],revenue:[45,52,60,58,65,70,null,null,null,null,null,null],cost:[34,38,34,38,40,32,null,null,null,null,null,null],profit:[11,14,26,20,25,38,null,null,null,null,null,null]};
+      const rcpC = {labels:['T1','T2','T3','T4','T5','T6'],revenue:[45,97,157,215,280,350],cost:[34,72,106,144,184,216],profit:[11,25,51,71,96,134]};
+      const rcpChart = new Chart(document.getElementById('revenueCostProfitChart'),{
+        type:'bar',
+        data:{labels:rcpM.labels,datasets:[
+          {label:'Doanh thu (tỷ)',data:rcpM.revenue,backgroundColor:'rgba(59,130,246,.75)',borderRadius:5,order:2},
+          {label:'Chi phí (tỷ)',data:rcpM.cost,backgroundColor:'rgba(239,68,68,.75)',borderRadius:5,order:2},
+          {type:'line',label:'Lợi nhuận (tỷ)',data:rcpM.profit,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.12)',borderWidth:3,pointRadius:5,pointBackgroundColor:'#10b981',tension:.3,fill:true,order:1}
+        ]},
+        plugins:[ChartDataLabels],
+        options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:commonGrid,title:{display:true,text:'Tỷ đồng'}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'},datalabels:{display:(c)=>c.dataset.type==='line'&&c.parsed&&c.parsed.y!=null,anchor:'end',align:'top',formatter:v=>v!=null?v+' tỷ':'',font:{size:10,weight:'600'},color:'#047857'}}}
+      });
+      window._rcpChart = rcpChart;
+      window.toggleRevenueCostView = function(view) {
+        if (!window._rcpChart) return;
+        const d = view==='monthly'?rcpM:rcpC;
+        window._rcpChart.data.labels=d.labels;
+        window._rcpChart.data.datasets[0].data=d.revenue;
+        window._rcpChart.data.datasets[1].data=d.cost;
+        window._rcpChart.data.datasets[2].data=d.profit;
+        window._rcpChart.update();
+        document.querySelectorAll('[onclick^="toggleRevenueCostView"]').forEach(b=>{
+          b.classList.toggle('active',b.getAttribute('onclick').includes("'"+view+"'"));
+        });
+      };
+
+      // Monthly Disbursement Rate
+      new Chart(document.getElementById('monthlyDisbursementRate'),{
+        type:'bar',
+        data:{labels:['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],datasets:[
+          {type:'line',label:'% Giải ngân TT',data:[88,92,85,90,87,82,null,null,null,null,null,null],borderColor:'#ef4444',backgroundColor:'transparent',borderWidth:3,pointRadius:5,pointBackgroundColor:'#ef4444',tension:.3,yAxisID:'yPct',order:1},
+          {label:'Kế hoạch (tỷ)',data:[32,37,40,40,45,38,38,35,37,30,25,20],backgroundColor:'rgba(59,130,246,.5)',borderRadius:4,order:2},
+          {label:'Thực tế (tỷ)',data:[27,35,34,38,40,32,null,null,null,null,null,null],backgroundColor:'#22c55e',borderRadius:4,order:2}
+        ]},
+        plugins:[ChartDataLabels],
+        options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:60,grid:commonGrid,title:{display:true,text:'Tỷ đồng'}},yPct:{position:'right',beginAtZero:true,max:100,grid:{display:false},title:{display:true,text:'%'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'},datalabels:{display:(c)=>c.datasetIndex===0&&c.raw!==null,anchor:'end',align:'top',color:'#ef4444',font:{weight:'bold',size:11},formatter:v=>v+'%'}}}
+      });
+
+      // Cost Budget Mix Chart
+      const p2CostPlan=[742,646,223];
+      const p2CostAct=[621.4,548.3,137.4];
+      const p2CostRate=p2CostPlan.map((v,i)=>+(p2CostAct[i]/v*100).toFixed(1));
+      const p2CostColors=p2CostRate.map(v=>v>=70?'#16a34a':v>=50?'#65a30d':v>=30?'#f59e0b':'#ef4444');
+      new Chart(document.getElementById('page2CostBudgetMixChart'),{
+        type:'bar',
+        data:{labels:[['Vật tư'],['Nhà thầu'],['Khác']],datasets:[{label:'Thực tế (tỷ)',data:p2CostAct,backgroundColor:p2CostColors,borderRadius:8,barThickness:36,maxBarThickness:44}]},
+        plugins:[ChartDataLabels],
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{top:4,right:10,bottom:4,left:0}},scales:{x:{beginAtZero:true,suggestedMax:800,grid:commonGrid,title:{display:true,text:'Tỷ đồng'}},y:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0,minRotation:0,color:'#1f3b63',font:{size:13,weight:'600'}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){const r=p2CostRate[c.dataIndex],p=p2CostPlan[c.dataIndex];return c.raw+' tỷ ('+r+'% giải ngân / KH '+p+' tỷ)'}}},datalabels:{display:true,anchor:'end',align:'right',offset:4,clamp:true,color:'#334155',font:{weight:'bold',size:11},formatter:(v,c)=>v+' tỷ ('+p2CostRate[c.dataIndex]+'%)'}}}
+      });
+
+      // Setup tree table
+      setupCostDetailTable();
+
+      // Task Monthly Chart
+      new Chart(document.getElementById('page2TaskMonthlyChart'),{
+        type:'bar',
+        data:{labels:['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],datasets:[
+          {label:'Số công việc hoàn thành',data:[2,3,4,5,6,7,6,5,4,3,2,1],backgroundColor:'#60a5fa',borderRadius:5,yAxisID:'y'},
+          {type:'line',label:'Tỷ lệ hoàn thành',data:[12,18,26,34,43,54,64,72,79,86,93,100],borderColor:'#ef4444',backgroundColor:'transparent',borderWidth:3,tension:.3,pointRadius:4,pointBackgroundColor:'#ef4444',yAxisID:'yPct'}
+        ]},
+        plugins:[ChartDataLabels],
+        options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:commonGrid,title:{display:true,text:'Công việc'}},yPct:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%'},title:{display:true,text:'%'}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'},datalabels:{display:c=>c.dataset.type==='line',anchor:'end',align:'top',color:'#dc2626',font:{weight:'bold',size:10},formatter:v=>v+'%'}}}
+      });
+
+      // Department Task Chart
+      new Chart(document.getElementById('page2DepartmentTaskChart'),{
+        type:'bar',
+        data:{labels:['Đầu tư - Pháp lý','GPMB','XD'],datasets:[{label:'Công việc hoàn thành',data:[13,2,6],backgroundColor:['#3b82f6','#f59e0b','#10b981'],borderRadius:6}]},
+        plugins:[ChartDataLabels],
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:commonGrid,title:{display:true,text:'Số công việc hoàn thành'}},y:{grid:{display:false}}},plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',color:'#334155',font:{weight:'bold',size:11}}}}
+      });
+    } // end initPage2Charts
+
+    // =================== COST ALERT SYSTEM ===================
+    function initCostAlerts() {
+      const banner = document.getElementById('costAlertBanner');
+      if (!banner) return;
+      const tables = ['vattuTable','nhathauTable','khacTable'];
+      const alerts = [];
+      tables.forEach(tid => {
+        const tbl = document.getElementById(tid);
+        if (!tbl) return;
+        tbl.querySelectorAll('tbody tr[data-budget]').forEach(row => {
+          const budget = parseFloat(row.dataset.budget);
+          const actual = parseFloat(row.dataset.actual);
+          if (!budget || !actual) return;
+          const pct = actual / budget * 100;
+          const nameEl = row.querySelector('td:first-child');
+          const name = nameEl ? nameEl.textContent.trim().replace(/\s+/g,' ') : '';
+          const actCell = row.querySelector('.act');
+          const bgtCell = row.querySelector('.bgt');
+          const statusCell = row.querySelector('.status-cell');
+
+          // Color the actual cell based on threshold
+          if (actCell) {
+            if (pct > 100) {
+              actCell.style.color = '#b91c1c';
+              actCell.style.fontWeight = '800';
+              actCell.style.background = '#fee2e2';
+              row.style.background = 'linear-gradient(90deg,#fff5f5,#ffe8e8)';
+              if (statusCell) statusCell.innerHTML = '<span class="status st-danger">⚠️ Vượt ngân sách</span>';
+              alerts.push({name, pct: pct.toFixed(1), actual, budget, type:'danger'});
+            } else if (pct > 90) {
+              actCell.style.color = '#b45309';
+              actCell.style.fontWeight = '700';
+              actCell.style.background = '#fef3c7';
+              if (statusCell) statusCell.innerHTML = '<span class="status st-warning">⚡ Sắp vượt</span>';
+              alerts.push({name, pct: pct.toFixed(1), actual, budget, type:'warn'});
+            } else if (pct >= 70) {
+              if (statusCell) statusCell.innerHTML = '<span class="status st-doing">✔ Đúng KH</span>';
+            } else {
+              if (statusCell) statusCell.innerHTML = '<span class="status st-todo">Còn lại</span>';
+            }
+          }
+        });
+      });
+
+      // Render alert banner
+      if (alerts.length === 0) {
+        banner.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:12px 16px;color:#166534;font-weight:700;font-size:13px;">✅ Tất cả khoản mục chi phí đang trong ngân sách cho phép.</div>';
+        return;
+      }
+      const dangerAlerts = alerts.filter(a => a.type === 'danger');
+      const warnAlerts   = alerts.filter(a => a.type === 'warn');
+      let html = '';
+      if (dangerAlerts.length) {
+        html += `<div style="flex:1;background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;">
+          <div style="font-weight:800;color:#b91c1c;font-size:13px;margin-bottom:8px;">🚨 VƯỢT NGÂN SÁCH (${dangerAlerts.length} khoản)</div>
+          ${dangerAlerts.map(a=>`<div style="font-size:12px;color:#7f1d1d;padding:3px 0;border-bottom:1px solid #fecaca;">
+            <b>${a.name}</b>: ${a.actual} tỷ / ${a.budget} tỷ — <span style="color:#b91c1c;font-weight:700;">${a.pct}%</span>
+          </div>`).join('')}
+        </div>`;
+      }
+      if (warnAlerts.length) {
+        html += `<div style="flex:1;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;">
+          <div style="font-weight:800;color:#b45309;font-size:13px;margin-bottom:8px;">⚡ SẮP VƯỢT NGÂN SÁCH (${warnAlerts.length} khoản)</div>
+          ${warnAlerts.map(a=>`<div style="font-size:12px;color:#78350f;padding:3px 0;border-bottom:1px solid #fde68a;">
+            <b>${a.name}</b>: ${a.actual} tỷ / ${a.budget} tỷ — <span style="color:#b45309;font-weight:700;">${a.pct}%</span>
+          </div>`).join('')}
+        </div>`;
+      }
+      banner.innerHTML = html;
+    }
+
+    // Run alerts when cost tab is opened
+    const origOpenPage2Subtab = openPage2Subtab;
+    function openPage2Subtab(evt, tabId) {
+      document.querySelectorAll('#page2 .page2-subtab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#page2 .page2-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+      if (tabId === 'page2-cost-management') initCostAlerts();
+      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 80);
+    }
+    function getTreeRowLevel(row) {
+      if (row.classList.contains('tree-level-2')) return 2;
+      if (row.classList.contains('tree-level-1')) return 1;
+      if (row.classList.contains('tree-parent')) return 0;
+      return -1;
+    }
+    function setupCostDetailTable() { /* table removed - now using vattuTable, nhathauTable, khacTable */ }
+  </script>
+</body>
+</html>
